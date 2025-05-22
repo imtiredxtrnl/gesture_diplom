@@ -1,0 +1,24 @@
+
+[
+  {
+    "id": "1",
+    "name": "Привет",
+    "description": "Жест приветствия, который используется для начала разговора или при встрече с кем-то.",
+    "imagePath": "assets/gestures/hello.png",
+    "category": "greetings"
+  },
+  {
+    "id": "2",
+    "name": "Спасибо",
+    "description": "Жест благодарности, который выражает признательность за что-либо.",
+    "imagePath": "assets/gestures/thank_you.png",
+    "category": "basic"
+  },
+  {
+    "id": "3",
+    "name": "Пожалуйста",
+    "description": "Жест вежливой просьбы или ответа на благодарность.",
+    "imagePath": "assets/gestures/please.png",
+    "category": "basic"
+  }
+]

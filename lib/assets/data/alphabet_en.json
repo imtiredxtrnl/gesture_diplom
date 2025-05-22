@@ -1,0 +1,20 @@
+[
+  {
+    "id": "en_a",
+    "letter": "A",
+    "language": "en",
+    "imagePath": "assets/alphabet/en/a.png"
+  },
+  {
+    "id": "en_b",
+    "letter": "B",
+    "language": "en",
+    "imagePath": "assets/alphabet/en/b.png"
+  },
+  {
+    "id": "en_c",
+    "letter": "C",
+    "language": "en",
+    "imagePath": "assets/alphabet/en/c.png"
+  }
+]

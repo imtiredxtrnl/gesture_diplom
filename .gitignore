@@ -1,0 +1,55 @@
+# Flutter/Dart/Pub
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+generated_plugin_registrant.dart
+
+# IntelliJ related
+*.iml
+.idea/
+
+# VS Code related
+.vscode/
+
+# macOS related
+.DS_Store
+
+# Windows related
+Thumbs.db
+
+# Android
+android/.gradle/
+android/captures/
+android/.idea/
+
+# iOS
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/.symlinks/
+ios/Pods/
+ios/Runner.xcworkspace/
+ios/DerivedData/
+
+# Xcode
+*.xcworkspace
+*.xcuserstate
+*.xcuserdata
+*.moved-aside
+
+# Web
+web/.dart_tool/
+web/build/
+
+# Environment files (если используешь)
+*.env
+.env*
+
+# Firebase crashlytics
+firebase_app_id_file.json
+
+# Логи
+*.log
+
+server/venv

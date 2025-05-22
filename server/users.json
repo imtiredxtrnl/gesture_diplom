@@ -1,0 +1,16 @@
+{
+    "user1@example.com": {
+        "password": "hashed_password_123",
+        "name": "John Doe",
+        "photo": "base64_encoded_image_or_url",
+        "role": "user",
+        "completedTests": ["1", "3", "5"]
+    },
+    "admin@example.com": {
+        "password": "admin_password_456",
+        "name": "Admin User",
+        "photo": "base64_encoded_image_or_url",
+        "role": "admin",
+        "completedTests": []
+    }
+}

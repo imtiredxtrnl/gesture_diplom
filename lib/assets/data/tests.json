@@ -1,0 +1,29 @@
+// assets/data/tests.json
+[
+  {
+    "id": "1",
+    "question": "Какой жест обозначает 'Привет'?",
+    "imagePath": "assets/tests/test1.png",
+    "options": [
+      "Поднятая рука с раскрытой ладонью",
+      "Сжатый кулак",
+      "Указательный палец направлен вверх",
+      "Две руки скрещены на груди"
+    ],
+    "correctOptionIndex": 0,
+    "category": "greetings"
+  },
+  {
+    "id": "2",
+    "question": "Какой жест обозначает 'Спасибо'?",
+    "imagePath": "assets/tests/test2.png",
+    "options": [
+      "Сжатый кулак",
+      "Рука прикладывается к губам и затем опускается вперед",
+      "Руки скрещены над головой",
+      "Большой палец вверх"
+    ],
+    "correctOptionIndex": 1,
+    "category": "basic"
+  }
+]

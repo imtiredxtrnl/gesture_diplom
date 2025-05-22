@@ -1,0 +1,20 @@
+[
+  {
+    "id": "uk_a",
+    "letter": "А",
+    "language": "uk",
+    "imagePath": "assets/alphabet/uk/a.png"
+  },
+  {
+    "id": "uk_б",
+    "letter": "Б",
+    "language": "uk",
+    "imagePath": "assets/alphabet/uk/b.png"
+  },
+  {
+    "id": "uk_в",
+    "letter": "В",
+    "language": "uk",
+    "imagePath": "assets/alphabet/uk/v.png"
+  }
+]
