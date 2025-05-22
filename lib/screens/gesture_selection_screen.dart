@@ -11,6 +11,7 @@ class GestureSelectionScreen extends StatefulWidget {
 class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
   List<Gesture> gestures = [];
   bool isLoading = true;
+  String searchQuery = '';
 
   @override
   void initState() {
@@ -92,6 +93,16 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
     }
   }
 
+  List<Gesture> get filteredGestures {
+    if (searchQuery.isEmpty) {
+      return gestures;
+    }
+    return gestures.where((gesture) =>
+    gesture.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
+        gesture.description.toLowerCase().contains(searchQuery.toLowerCase())
+    ).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,7 +113,7 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
-          : gestures.isEmpty
+          : filteredGestures.isEmpty
           ? Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -143,7 +154,7 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
                     Icon(Icons.info, color: Colors.blue[700]),
                     SizedBox(width: 8),
                     Text(
-                      'Инструкция',
+                      'Інструкція',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -154,7 +165,7 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  '• Выберите жест для практики\n• У вас будет 60 секунд для тренировки\n• Следуйте описанию жеста\n• Камера будет распознавать ваши движения',
+                  '• Виберіть жест для практики\n• У вас буде 30 секунд для тренування\n• Слідуйте опису жеста\n• Камера буде розпізнавати ваші рухи',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.blue[600],
@@ -163,13 +174,33 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
               ],
             ),
           ),
+          // Поиск
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: TextField(
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value;
+                });
+              },
+              decoration: InputDecoration(
+                hintText: 'Поиск жестов...',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                contentPadding: EdgeInsets.symmetric(vertical: 12),
+              ),
+            ),
+          ),
+          SizedBox(height: 8),
           // Список жестов
           Expanded(
             child: ListView.builder(
               padding: EdgeInsets.symmetric(horizontal: 16),
-              itemCount: gestures.length,
+              itemCount: filteredGestures.length,
               itemBuilder: (context, index) {
-                final gesture = gestures[index];
+                final gesture = filteredGestures[index];
                 return Card(
                   margin: EdgeInsets.only(bottom: 12),
                   elevation: 2,
@@ -182,8 +213,7 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => GesturePracticeScreen(
-                            gestureName: gesture.name,
-                            gestureDescription: gesture.description,
+                            gesture: gesture, // Передаем объект Gesture
                           ),
                         ),
                       );
@@ -201,7 +231,22 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
                               color: Colors.deepPurple[100],
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: Icon(
+                            child: gesture.imagePath.isNotEmpty
+                                ? ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: Image.asset(
+                                gesture.imagePath,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Icon(
+                                    Icons.gesture,
+                                    size: 30,
+                                    color: Colors.deepPurple[700],
+                                  );
+                                },
+                              ),
+                            )
+                                : Icon(
                               Icons.gesture,
                               size: 30,
                               color: Colors.deepPurple[700],

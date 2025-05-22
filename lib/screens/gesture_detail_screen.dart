@@ -13,18 +13,33 @@ class GestureDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(gesture.name),
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Изображение жеста
             Container(
               width: double.infinity,
               height: 250,
               decoration: BoxDecoration(
                 color: Colors.grey[200],
               ),
-              child: Icon(
+              child: gesture.imagePath.isNotEmpty
+                  ? Image.asset(
+                gesture.imagePath,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(
+                    Icons.gesture,
+                    size: 100,
+                    color: Colors.grey[400],
+                  );
+                },
+              )
+                  : Icon(
                 Icons.gesture,
                 size: 100,
                 color: Colors.grey[400],
@@ -113,20 +128,28 @@ class GestureDetailScreen extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) => GesturePracticeScreen(
-                              gestureName: gesture.name,
-                              gestureDescription: gesture.description,
+                              gesture: gesture, // Передаем объект Gesture
                             ),
                           ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: Text(
-                        'Попрактиковаться с камерой',
-                        style: TextStyle(fontSize: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.camera_alt),
+                          SizedBox(width: 8),
+                          Text(
+                            'Попрактиковаться с камерой',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ],
                       ),
                     ),
                   ),

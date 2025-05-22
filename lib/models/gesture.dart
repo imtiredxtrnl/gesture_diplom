@@ -1,9 +1,11 @@
+// lib/models/gesture.dart
 class Gesture {
   final String id;
   final String name;
   final String description;
   final String imagePath;
-  final String category; // категория жеста (базовый, приветствие и т.д.)
+  final String category;
+  final bool? isLearned; // Опциональное поле для отслеживания изученности
 
   Gesture({
     required this.id,
@@ -11,6 +13,7 @@ class Gesture {
     required this.description,
     required this.imagePath,
     this.category = 'basic',
+    this.isLearned,
   });
 
   factory Gesture.fromJson(Map<String, dynamic> json) {
@@ -20,6 +23,7 @@ class Gesture {
       description: json['description'],
       imagePath: json['imagePath'],
       category: json['category'] ?? 'basic',
+      isLearned: json['isLearned'],
     );
   }
 
@@ -30,6 +34,26 @@ class Gesture {
       'description': description,
       'imagePath': imagePath,
       'category': category,
+      'isLearned': isLearned,
     };
+  }
+
+  // Метод для создания копии с изменениями
+  Gesture copyWith({
+    String? id,
+    String? name,
+    String? description,
+    String? imagePath,
+    String? category,
+    bool? isLearned,
+  }) {
+    return Gesture(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      imagePath: imagePath ?? this.imagePath,
+      category: category ?? this.category,
+      isLearned: isLearned ?? this.isLearned,
+    );
   }
 }

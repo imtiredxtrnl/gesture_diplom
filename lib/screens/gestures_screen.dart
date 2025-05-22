@@ -1,9 +1,9 @@
-// lib/screens/gestures_screen.dart (обновляем только кнопку практики)
+// lib/screens/gestures_screen.dart
 import 'package:flutter/material.dart';
 import '../screens/dictionary_screen.dart';
 import '../screens/alphabet_selection_screen.dart';
 import '../screens/tests_screen.dart';
-import '../screens/gesture_selection_screen.dart'; // Добавляем импорт
+import '../screens/gesture_selection_screen.dart';
 
 class GesturesScreen extends StatelessWidget {
   @override
@@ -32,7 +32,7 @@ class GesturesScreen extends StatelessWidget {
             Colors.teal[700]!,
                 () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => GestureSelectionScreen()) // Изменяем на GestureSelectionScreen
+                MaterialPageRoute(builder: (context) => GestureSelectionScreen())
             ),
           ),
           SizedBox(height: 16),

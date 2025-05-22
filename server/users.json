@@ -4,9 +4,13 @@
         "name": "John Doe",
         "photo": "base64_encoded_image_or_url",
         "role": "user",
-        "completedTests": ["1", "3", "5"]
+        "completedTests": [
+            "1",
+            "3",
+            "5"
+        ]
     },
-    "admin@example.com": {
+    "debil@gmail.com": {
         "password": "admin_password_456",
         "name": "Admin User",
         "photo": "base64_encoded_image_or_url",
