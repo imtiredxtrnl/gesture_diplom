@@ -88,13 +88,13 @@ class _MainScreenState extends State<MainScreen> {
   List<String> get _titles {
     final baseTitles = [
       'Камера',
-      'Жесты',
-      'Профиль',
+      'Жести',
+      'Профіль',
     ];
 
     // Добавляем название для админ-панели, если пользователь - админ
     if (_isAdmin) {
-      return [...baseTitles, 'Админ-панель'];
+      return [...baseTitles, 'Адмін-панель'];
     }
 
     return baseTitles;
@@ -133,16 +133,16 @@ class _MainScreenState extends State<MainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.sign_language),
-            label: 'Жесты',
+            label: 'Жести',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Профиль',
+            label: 'Профіль',
           ),
           if (_isAdmin)
             BottomNavigationBarItem(
               icon: Icon(Icons.admin_panel_settings),
-              label: 'Админ',
+              label: 'Адмін',
             ),
         ],
       ),

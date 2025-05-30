@@ -4,8 +4,8 @@ class Gesture {
   final String name;
   final String description;
   final String imagePath;
-  final String category;
-  final bool? isLearned; // Опциональное поле для отслеживания изученности
+  final String category; // категория жеста (базовый, приветствие и т.д.)
+  final bool isLearned; // для отслеживания прогресса пользователя
 
   Gesture({
     required this.id,
@@ -13,17 +13,17 @@ class Gesture {
     required this.description,
     required this.imagePath,
     this.category = 'basic',
-    this.isLearned,
+    this.isLearned = false,
   });
 
   factory Gesture.fromJson(Map<String, dynamic> json) {
     return Gesture(
-      id: json['id'],
-      name: json['name'],
-      description: json['description'],
-      imagePath: json['imagePath'],
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
+      imagePath: json['imagePath'] ?? '',
       category: json['category'] ?? 'basic',
-      isLearned: json['isLearned'],
+      isLearned: json['isLearned'] ?? false,
     );
   }
 
@@ -56,4 +56,19 @@ class Gesture {
       isLearned: isLearned ?? this.isLearned,
     );
   }
+
+  @override
+  String toString() {
+    return 'Gesture{id: $id, name: $name, category: $category, isLearned: $isLearned}';
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is Gesture &&
+              runtimeType == other.runtimeType &&
+              id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

@@ -65,7 +65,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String title = widget.language == 'uk' ? 'Украинский алфавит' : 'Английский алфавит';
+    String title = widget.language == 'uk' ? 'Український алфавіт' : 'Англійський алфавіт';
 
     return Scaffold(
       appBar: AppBar(
@@ -74,7 +74,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : letters.isEmpty
-          ? Center(child: Text('Алфавит не найден'))
+          ? Center(child: Text('Алфавіт не знайдено'))
           : GridView.builder(
         padding: EdgeInsets.all(16),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

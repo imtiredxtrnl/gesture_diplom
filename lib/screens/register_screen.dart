@@ -25,14 +25,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // Валидация полей
     if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       setState(() {
-        _errorMessage = 'Все поля обязательны для заполнения';
+        _errorMessage = 'Усі поля обов\'язкові до заповнення';
       });
       return;
     }
 
     if (password != confirmPassword) {
       setState(() {
-        _errorMessage = 'Пароли не совпадают';
+        _errorMessage = 'Паролі не співпадають';
       });
       return;
     }
@@ -40,7 +40,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // Установка состояния регистрации
     setState(() {
       _isRegistering = true;
-      _errorMessage = 'Регистрация...';
+      _errorMessage = 'Реєстрація...';
     });
 
     // Формирование данных для отправки
@@ -73,14 +73,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         if (responseData['status'] == 'Success') {
           // Показываем сообщение об успешной регистрации
           ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Регистрация успешна! Теперь вы можете войти.'))
+              SnackBar(content: Text('Реєстрація успішна! Тепер Ви можете увійти.'))
           );
 
           // Возвращаемся на экран входа
           Navigator.pop(context);
         } else {
           setState(() {
-            _errorMessage = responseData['message'] ?? 'Ошибка регистрации';
+            _errorMessage = responseData['message'] ?? 'Помилка реєстрації';
           });
         }
 
@@ -90,7 +90,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         print("Register WebSocket error: $error");
         setState(() {
           _isRegistering = false;
-          _errorMessage = 'Ошибка соединения: $error';
+          _errorMessage = 'Помилка з\'єднання: $error';
         });
         // Закрываем канал
         registerChannel.sink.close();
@@ -98,14 +98,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         if (_isRegistering) {
           setState(() {
             _isRegistering = false;
-            _errorMessage = 'Соединение закрыто до получения ответа';
+            _errorMessage = 'З\'єднання закрито до отримання відповіді';
           });
         }
       });
     } catch (e) {
       setState(() {
         _isRegistering = false;
-        _errorMessage = 'Ошибка соединения с сервером: $e';
+        _errorMessage = 'Помилка з\'єднання із сервером: $e';
       });
       print("Error connecting to WebSocket server: $e");
     }
@@ -115,7 +115,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Регистрация'),
+        title: Text('Реєстрація'),
         backgroundColor: Colors.deepPurple,
       ),
       backgroundColor: Colors.deepPurple[50],
@@ -126,7 +126,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Создание нового аккаунта',
+                'Створення нового акаунта',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 24),
@@ -142,7 +142,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               TextField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: 'Имя',
+                  labelText: 'Ім\'я',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -160,7 +160,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 controller: _confirmPasswordController,
                 obscureText: true,
                 decoration: InputDecoration(
-                  labelText: 'Подтвердите пароль',
+                  labelText: 'Підтвердіть пароль',
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -180,10 +180,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         )
                     ),
                     SizedBox(width: 10),
-                    Text('Регистрация...'),
+                    Text('Реєстрація...'),
                   ],
                 ) :
-                Text('Зарегистрироваться'),
+                Text('Зареєструватися'),
               ),
               if (_errorMessage.isNotEmpty) ...[
                 SizedBox(height: 12),

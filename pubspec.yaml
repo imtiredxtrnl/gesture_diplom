@@ -27,7 +27,19 @@ dev_dependencies:
 
 flutter:
   assets:
-    - lib/assets/gestures/hello.png
+    # Gesture images
+    - lib/assets/gestures/
+    # Alphabet images
+    - lib/assets/alphabet/uk/
+    - lib/assets/alphabet/en/
+    # Test images
+    - lib/assets/tests/
+    # Default images
+    - lib/assets/images/
+    # Data files
+    - lib/assets/data/
+    # Default avatar
     - lib/assets/default_avatar.png
+
 
   uses-material-design: true

@@ -1,7 +1,7 @@
+// lib/screens/admin_tests_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'dart:convert';
 import '../models/test_model.dart';
+import '../services/admin_service.dart';
 import 'add_test_screen.dart';
 
 class AdminTestsScreen extends StatefulWidget {
@@ -13,6 +13,7 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
   List<Test> tests = [];
   bool isLoading = true;
   String searchQuery = '';
+  final AdminService _adminService = AdminService();
 
   @override
   void initState() {
@@ -21,52 +22,14 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
   }
 
   Future<void> _loadTests() async {
-    try {
-      // Создаем тестовые данные
-      List<Test> testData = [
-        Test(
-          id: '1',
-          question: 'Какой жест обозначает "Привет"?',
-          imagePath: 'assets/tests/test1.png',
-          options: [
-            'Поднятая рука с раскрытой ладонью',
-            'Сжатый кулак',
-            'Указательный палец направлен вверх',
-            'Две руки скрещены на груди'
-          ],
-          correctOptionIndex: 0,
-          category: 'greetings',
-        ),
-        Test(
-          id: '2',
-          question: 'Какой жест обозначает "Спасибо"?',
-          imagePath: 'assets/tests/test2.png',
-          options: [
-            'Сжатый кулак',
-            'Рука прикладывается к губам и затем опускается вперед',
-            'Руки скрещены над головой',
-            'Большой палец вверх'
-          ],
-          correctOptionIndex: 1,
-          category: 'basic',
-        ),
-        Test(
-          id: '3',
-          question: 'Какой жест означает "Да"?',
-          imagePath: 'assets/tests/test3.png',
-          options: [
-            'Качание головой влево-вправо',
-            'Кивание головой вверх-вниз',
-            'Поднятие плеч',
-            'Указание пальцем'
-          ],
-          correctOptionIndex: 1,
-          category: 'basic',
-        ),
-      ];
+    setState(() {
+      isLoading = true;
+    });
 
+    try {
+      final loadedTests = await _adminService.getAllTests();
       setState(() {
-        tests = testData;
+        tests = loadedTests;
         isLoading = false;
       });
     } catch (e) {
@@ -74,6 +37,9 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
         isLoading = false;
       });
       print('Error loading tests: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка загрузки тестов: $e')),
+      );
     }
   }
 
@@ -87,11 +53,35 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
     ).toList();
   }
 
+  Future<void> _deleteTest(Test test) async {
+    try {
+      final result = await _adminService.deleteTest(test.id);
+      if (result['status'] == 'success') {
+        setState(() {
+          tests.removeWhere((t) => t.id == test.id);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Тест удален')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка удаления: ${result['message']}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка удаления теста: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Управление тестами'),
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: Icon(Icons.refresh),
@@ -121,9 +111,51 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
           ),
           Expanded(
             child: isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? Center(child: CircularProgressIndicator(
+              color: Colors.deepPurple,
+            ))
                 : filteredTests.isEmpty
-                ? Center(child: Text('Тесты не найдены'))
+                ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.quiz,
+                    size: 64,
+                    color: Colors.grey[400],
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    searchQuery.isEmpty ? 'Тесты не найдены' : 'Нет результатов поиска',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  if (searchQuery.isEmpty) ...[
+                    SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AddTestScreen(),
+                          ),
+                        );
+                        if (result == true) {
+                          _loadTests();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text('Добавить первый тест'),
+                    ),
+                  ],
+                ],
+              ),
+            )
                 : ListView.builder(
               padding: EdgeInsets.all(16),
               itemCount: filteredTests.length,
@@ -145,7 +177,8 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
             _loadTests();
           }
         },
-        child: Icon(Icons.add),
+        backgroundColor: Colors.deepPurple,
+        child: Icon(Icons.add, color: Colors.white),
         tooltip: 'Добавить тест',
       ),
     );
@@ -162,14 +195,15 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
         child: Icon(
           Icons.delete,
           color: Colors.white,
+          size: 32,
         ),
       ),
       confirmDismiss: (direction) async {
-        return await showDialog(
+        return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
             title: Text('Удаление теста'),
-            content: Text('Вы уверены, что хотите удалить тест "${test.question}"?'),
+            content: Text('Вы уверены, что хотите удалить этот тест?'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
@@ -177,6 +211,9 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.red,
+                ),
                 child: Text('УДАЛИТЬ'),
               ),
             ],
@@ -184,57 +221,116 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
         );
       },
       onDismissed: (direction) async {
-        // В реальном приложении здесь был бы API-запрос на удаление
-        setState(() {
-          tests.removeWhere((t) => t.id == test.id);
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Тест "${test.question}" удален')),
-        );
+        await _deleteTest(test);
       },
       child: Card(
         margin: EdgeInsets.only(bottom: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        child: ListTile(
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          leading: Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(8),
+        elevation: 2,
+        child: InkWell(
+          onTap: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddTestScreen(test: test),
+              ),
+            );
+            if (result == true) {
+              _loadTests();
+            }
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.green[100],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.quiz,
+                    color: Colors.green[700],
+                    size: 30,
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        test.question,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              test.category,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Icon(Icons.help_outline, size: 16, color: Colors.grey[600]),
+                          SizedBox(width: 4),
+                          Text(
+                            '${test.options.length} варианта',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Правильный ответ: ${test.options[test.correctOptionIndex]}',
+                        style: TextStyle(
+                          color: Colors.green[700],
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.edit,
+                  color: Colors.deepPurple,
+                ),
+              ],
             ),
-            child: Icon(
-              Icons.quiz,
-              color: Colors.grey[600],
-            ),
-          ),
-          title: Text(
-            test.question,
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Категория: ${test.category}'),
-              SizedBox(height: 4),
-              Text('Варианты ответов: ${test.options.length}'),
-            ],
-          ),
-          isThreeLine: true,
-          trailing: IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () async {
-              // В реальном приложении здесь был бы переход на экран редактирования
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Редактирование теста пока не реализовано')),
-              );
-            },
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _adminService.dispose();
+    super.dispose();
   }
 }

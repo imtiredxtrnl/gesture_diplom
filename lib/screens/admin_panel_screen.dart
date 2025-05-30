@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'admin_gestures_screen.dart';
-import 'admin_alphabet_screen.dart';
 import 'admin_tests_screen.dart';
 
 class AdminPanelScreen extends StatelessWidget {
@@ -12,19 +11,19 @@ class AdminPanelScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Панель администратора',
+            'Панель адміністратора',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
           SizedBox(height: 24),
-          _buildSectionTitle('Управление контентом'),
+          _buildSectionTitle('Управління контентом'),
           SizedBox(height: 16),
           _buildAdminCard(
             context,
-            'Управление жестами',
-            'Добавление, редактирование и удаление жестов',
+            'Управління жестами',
+            'Додавання, редагування та видалення жестів',
             Icons.sign_language,
             Colors.purple[700]!,
                 () => Navigator.push(
@@ -35,20 +34,8 @@ class AdminPanelScreen extends StatelessWidget {
           SizedBox(height: 12),
           _buildAdminCard(
             context,
-            'Управление алфавитом',
-            'Добавление и редактирование букв алфавита',
-            Icons.text_fields,
-            Colors.blue[700]!,
-                () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AdminAlphabetScreen()),
-            ),
-          ),
-          SizedBox(height: 12),
-          _buildAdminCard(
-            context,
-            'Управление тестами',
-            'Создание и редактирование тестов',
+            'Управління тестами',
+            'Створення та редагування тестів',
             Icons.quiz,
             Colors.green[700]!,
                 () => Navigator.push(
@@ -59,11 +46,11 @@ class AdminPanelScreen extends StatelessWidget {
           SizedBox(height: 24),
           _buildSectionTitle('Статистика'),
           SizedBox(height: 16),
-          _buildStatCard('Всего пользователей', '24', Icons.people, Colors.orange),
+          _buildStatCard('Всього користувачів', '1', Icons.people, Colors.orange),
           SizedBox(height: 12),
-          _buildStatCard('Жестов в словаре', '48', Icons.category, Colors.teal),
+          _buildStatCard('Жестів у словнику', '5', Icons.category, Colors.teal),
           SizedBox(height: 12),
-          _buildStatCard('Тестов', '15', Icons.assignment, Colors.indigo),
+          _buildStatCard('Тестів', '5', Icons.assignment, Colors.indigo),
         ],
       ),
     );

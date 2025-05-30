@@ -1,19 +1,15 @@
 {
-    "user1@example.com": {
-        "password": "hashed_password_123",
-        "name": "John Doe",
-        "photo": "base64_encoded_image_or_url",
+    "user@example.com": {
+        "password": "user123",
+        "name": "User",
+        "photo": "",
         "role": "user",
-        "completedTests": [
-            "1",
-            "3",
-            "5"
-        ]
+        "completedTests": []
     },
-    "debil@gmail.com": {
-        "password": "admin_password_456",
-        "name": "Admin User",
-        "photo": "base64_encoded_image_or_url",
+    "admin@example.com": {
+        "password": "admin123",
+        "name": "Admin",
+        "photo": "",
         "role": "admin",
         "completedTests": []
     }

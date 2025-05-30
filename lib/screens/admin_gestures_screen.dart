@@ -1,7 +1,7 @@
+// lib/screens/admin_gestures_screen.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'dart:convert';
 import '../models/gesture.dart';
+import '../services/admin_service.dart';
 import 'add_gesture_screen.dart';
 
 class AdminGesturesScreen extends StatefulWidget {
@@ -13,6 +13,7 @@ class _AdminGesturesScreenState extends State<AdminGesturesScreen> {
   List<Gesture> gestures = [];
   bool isLoading = true;
   String searchQuery = '';
+  final AdminService _adminService = AdminService();
 
   @override
   void initState() {
@@ -21,34 +22,14 @@ class _AdminGesturesScreenState extends State<AdminGesturesScreen> {
   }
 
   Future<void> _loadGestures() async {
-    try {
-      // Создаем тестовые данные жестов
-      List<Gesture> testGestures = [
-        Gesture(
-          id: '1',
-          name: 'Привет',
-          description: 'Жест приветствия, который используется для начала разговора или при встрече с кем-то.',
-          imagePath: 'assets/gestures/hello.png',
-          category: 'greetings',
-        ),
-        Gesture(
-          id: '2',
-          name: 'Спасибо',
-          description: 'Жест благодарности, который выражает признательность за что-либо.',
-          imagePath: 'assets/gestures/thank_you.png',
-          category: 'basic',
-        ),
-        Gesture(
-          id: '3',
-          name: 'Пожалуйста',
-          description: 'Жест вежливой просьбы или ответа на благодарность.',
-          imagePath: 'assets/gestures/please.png',
-          category: 'basic',
-        ),
-      ];
+    setState(() {
+      isLoading = true;
+    });
 
+    try {
+      final loadedGestures = await _adminService.getAllGestures();
       setState(() {
-        gestures = testGestures;
+        gestures = loadedGestures;
         isLoading = false;
       });
     } catch (e) {
@@ -56,6 +37,9 @@ class _AdminGesturesScreenState extends State<AdminGesturesScreen> {
         isLoading = false;
       });
       print('Error loading gestures: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка загрузки жестов: $e')),
+      );
     }
   }
 
@@ -69,11 +53,35 @@ class _AdminGesturesScreenState extends State<AdminGesturesScreen> {
     ).toList();
   }
 
+  Future<void> _deleteGesture(Gesture gesture) async {
+    try {
+      final result = await _adminService.deleteGesture(gesture.id);
+      if (result['status'] == 'success') {
+        setState(() {
+          gestures.removeWhere((g) => g.id == gesture.id);
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Жест "${gesture.name}" удален')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка удаления: ${result['message']}')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка удаления жеста: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Управление жестами'),
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: Icon(Icons.refresh),
@@ -103,9 +111,51 @@ class _AdminGesturesScreenState extends State<AdminGesturesScreen> {
           ),
           Expanded(
             child: isLoading
-                ? Center(child: CircularProgressIndicator())
+                ? Center(child: CircularProgressIndicator(
+              color: Colors.deepPurple,
+            ))
                 : filteredGestures.isEmpty
-                ? Center(child: Text('Жесты не найдены'))
+                ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.gesture,
+                    size: 64,
+                    color: Colors.grey[400],
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    searchQuery.isEmpty ? 'Жесты не найдены' : 'Нет результатов поиска',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  if (searchQuery.isEmpty) ...[
+                    SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () async {
+                        final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AddGestureScreen(),
+                          ),
+                        );
+                        if (result == true) {
+                          _loadGestures();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text('Добавить первый жест'),
+                    ),
+                  ],
+                ],
+              ),
+            )
                 : ListView.builder(
               padding: EdgeInsets.all(16),
               itemCount: filteredGestures.length,
@@ -127,7 +177,8 @@ class _AdminGesturesScreenState extends State<AdminGesturesScreen> {
             _loadGestures();
           }
         },
-        child: Icon(Icons.add),
+        backgroundColor: Colors.deepPurple,
+        child: Icon(Icons.add, color: Colors.white),
         tooltip: 'Добавить жест',
       ),
     );
@@ -144,10 +195,11 @@ class _AdminGesturesScreenState extends State<AdminGesturesScreen> {
         child: Icon(
           Icons.delete,
           color: Colors.white,
+          size: 32,
         ),
       ),
       confirmDismiss: (direction) async {
-        return await showDialog(
+        return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
             title: Text('Удаление жеста'),
@@ -159,6 +211,9 @@ class _AdminGesturesScreenState extends State<AdminGesturesScreen> {
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.red,
+                ),
                 child: Text('УДАЛИТЬ'),
               ),
             ],
@@ -166,52 +221,114 @@ class _AdminGesturesScreenState extends State<AdminGesturesScreen> {
         );
       },
       onDismissed: (direction) async {
-        // В реальном приложении здесь был бы API-запрос на удаление
-        setState(() {
-          gestures.removeWhere((g) => g.id == gesture.id);
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Жест "${gesture.name}" удален')),
-        );
+        await _deleteGesture(gesture);
       },
       child: Card(
         margin: EdgeInsets.only(bottom: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        child: ListTile(
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          leading: Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(8),
+        elevation: 2,
+        child: InkWell(
+          onTap: () async {
+            final result = await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddGestureScreen(gesture: gesture),
+              ),
+            );
+            if (result == true) {
+              _loadGestures();
+            }
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.deepPurple[100],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: gesture.imagePath.isNotEmpty
+                      ? ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      gesture.imagePath,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.gesture,
+                          color: Colors.deepPurple[700],
+                          size: 30,
+                        );
+                      },
+                    ),
+                  )
+                      : Icon(
+                    Icons.gesture,
+                    color: Colors.deepPurple[700],
+                    size: 30,
+                  ),
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        gesture.name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          gesture.category,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        gesture.description.length > 100
+                            ? '${gesture.description.substring(0, 100)}...'
+                            : gesture.description,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.edit,
+                  color: Colors.deepPurple,
+                ),
+              ],
             ),
-            child: Icon(
-              Icons.gesture,
-              color: Colors.grey[600],
-            ),
-          ),
-          title: Text(
-            gesture.name,
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          subtitle: Text(
-            'Категория: ${gesture.category}\n${gesture.description.substring(0, gesture.description.length > 50 ? 50 : gesture.description.length)}${gesture.description.length > 50 ? "..." : ""}',
-          ),
-          isThreeLine: true,
-          trailing: IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () async {
-              // В реальном приложении здесь был бы переход на экран редактирования
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Редактирование жеста пока не реализовано')),
-              );
-            },
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _adminService.dispose();
+    super.dispose();
   }
 }

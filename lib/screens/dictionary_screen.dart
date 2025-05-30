@@ -40,71 +40,71 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
       List<Gesture> testGestures = [
         Gesture(
           id: '1',
-          name: 'Привет',
-          description: 'Жест приветствия, который используется для начала разговора или при встрече с кем-то.',
+          name: 'Привіт',
+          description: 'Жест привітання, який використовується для початку розмови або під час зустрічі з кимось.',
           imagePath: 'assets/gestures/hello.png',
           category: 'greetings',
         ),
         Gesture(
           id: '2',
-          name: 'Спасибо',
-          description: 'Жест благодарности, который выражает признательность за что-либо.',
+          name: 'Дякую',
+          description: 'Жест подяки, який виражає вдячність за що-небудь',
           imagePath: 'assets/gestures/thank_you.png',
           category: 'basic',
         ),
         Gesture(
           id: '3',
-          name: 'Пожалуйста',
-          description: 'Жест вежливой просьбы или ответа на благодарность.',
+          name: 'Будь-ласка',
+          description: 'Жест ввічливого прохання або відповіді на подяку.',
           imagePath: 'assets/gestures/please.png',
           category: 'basic',
         ),
         Gesture(
           id: '4',
-          name: 'Да',
-          description: 'Жест согласия, который означает положительный ответ.',
+          name: 'Так',
+          description: 'Жест згоди, який означає позитивну відповідь.',
           imagePath: 'assets/gestures/yes.png',
           category: 'basic',
         ),
         Gesture(
           id: '5',
-          name: 'Нет',
-          description: 'Жест отрицания, который означает отрицательный ответ.',
+          name: 'Ні',
+          description: 'Жест заперечення, який означає негативну відповідь.',
           imagePath: 'assets/gestures/no.png',
           category: 'basic',
         ),
         Gesture(
           id: '6',
-          name: 'Хорошо',
-          description: 'Жест одобрения и положительной оценки.',
+          name: 'Добре',
+          description: 'Жест схвалення і позитивної оцінки.',
           imagePath: 'assets/gestures/good.png',
           category: 'emotions',
         ),
         Gesture(
           id: '7',
-          name: 'Плохо',
-          description: 'Жест неодобрения и отрицательной оценки.',
+          name: 'Погано',
+          description: 'Жест несхвалення і негативної оцінки.',
           imagePath: 'assets/gestures/bad.png',
           category: 'emotions',
         ),
         Gesture(
           id: '8',
-          name: 'Как дела?',
-          description: 'Вопросительный жест для выяснения состояния дел.',
+          name: 'Як справи?',
+          description: 'Запитальний жест для з\'ясування стану справ.',
           imagePath: 'assets/gestures/how_are_you.png',
           category: 'questions',
         ),
         Gesture(
           id: '9',
-          name: 'Извините',
-          description: 'Жест извинения за совершенную ошибку или неудобство.',
+          name: 'Вибачте',
+          description: 'Жест вибачення за скоєну помилку або незручність.',
           imagePath: 'assets/gestures/sorry.png',
           category: 'basic',
         ),
         Gesture(
           id: '10',
-          name: 'Помогите',
-          description: 'Жест просьбы о помощи в сложной ситуации.',
+          name: 'Допоможіть',
+          description: 'Жест прохання про допомогу в складній ситуації.',
           imagePath: 'assets/gestures/help.png',
           category: 'actions',
         ),
@@ -144,19 +144,19 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
       case 'all':
         return 'Все';
       case 'basic':
-        return 'Базовые';
+        return 'Базові';
       case 'greetings':
-        return 'Приветствие';
+        return 'Привітання';
       case 'questions':
-        return 'Вопросы';
+        return 'Питання';
       case 'emotions':
-        return 'Эмоции';
+        return 'Емоції';
       case 'actions':
-        return 'Действия';
+        return 'Дії';
       case 'family':
-        return 'Семья';
+        return 'Сім\'я';
       case 'food':
-        return 'Еда';
+        return 'Їжа';
       case 'numbers':
         return 'Числа';
       default:
@@ -168,7 +168,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Словарь жестов'),
+        title: Text('Словник жестів'),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
       ),
@@ -184,7 +184,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                 });
               },
               decoration: InputDecoration(
-                hintText: 'Поиск жестов...',
+                hintText: 'Пошук жестів...',
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -234,7 +234,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                     color: Colors.deepPurple,
                   ),
                   SizedBox(height: 16),
-                  Text('Загрузка жестов...'),
+                  Text('Завантаження жестів...'),
                 ],
               ),
             )
@@ -250,7 +250,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'Жесты не найдены',
+                    'Жести не знайдено',
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.grey[600],
@@ -258,7 +258,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Попробуйте изменить параметры поиска',
+                    'Спробуйте змінити параметри пошуку',
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[500],

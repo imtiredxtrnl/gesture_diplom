@@ -10,7 +10,7 @@ class LetterDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Буква ${letter.letter}'),
+        title: Text('Літера ${letter.letter}'),
       ),
       body: Column(
         children: [
@@ -48,8 +48,8 @@ class LetterDetailScreen extends StatelessWidget {
                 SizedBox(height: 16),
                 Text(
                   letter.language == 'uk'
-                      ? 'Украинский дактильный алфавит'
-                      : 'Английский дактильный алфавит',
+                      ? 'Український дактильний алфавіт'
+                      : 'Англійський дактильний алфавіт',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey[600],
@@ -57,7 +57,7 @@ class LetterDetailScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 32),
                 Text(
-                  'В демо-версии изображения жестов для букв не загружены',
+                  'У демо-версії зображення жестів для букв не завантажені',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[500],

@@ -61,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ),
             SizedBox(height: 24),
             Text(
-              'Изучение языка жестов',
+              'Вивчення мови жестів',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,

@@ -26,131 +26,161 @@ class GestureDetailScreen extends StatelessWidget {
               height: 250,
               decoration: BoxDecoration(
                 color: Colors.grey[200],
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey[300]!, width: 1),
+                ),
               ),
               child: gesture.imagePath.isNotEmpty
                   ? Image.asset(
                 gesture.imagePath,
-                fit: BoxFit.cover,
+                fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {
-                  return Icon(
-                    Icons.gesture,
-                    size: 100,
-                    color: Colors.grey[400],
-                  );
+                  return _buildImagePlaceholder();
                 },
               )
-                  : Icon(
-                Icons.gesture,
-                size: 100,
-                color: Colors.grey[400],
-              ),
+                  : _buildImagePlaceholder(),
             ),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Название и категория
                   Row(
                     children: [
-                      Text(
-                        gesture.name,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Spacer(),
-                      Chip(
-                        label: Text(
-                          gesture.category,
+                      Expanded(
+                        child: Text(
+                          gesture.name,
                           style: TextStyle(
-                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey[800],
                           ),
                         ),
-                        backgroundColor: Colors.deepPurple,
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.deepPurple,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          _getCategoryName(gesture.category),
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 16),
-                  Text(
-                    'Описание',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
-                    ),
-                  ),
+                  SizedBox(height: 24),
+
+                  // Описание
+                  _buildSectionTitle('Описание'),
                   SizedBox(height: 8),
                   Text(
                     gesture.description,
                     style: TextStyle(
                       fontSize: 16,
                       height: 1.5,
+                      color: Colors.grey[700],
                     ),
                   ),
                   SizedBox(height: 24),
-                  Text(
-                    'Как выполнить',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  _buildStepCard(
+
+                  // Инструкции по выполнению
+                  _buildSectionTitle('Как выполнить'),
+                  SizedBox(height: 12),
+                  _buildInstructionCard(
                     '1',
                     'Подготовка',
-                    'Расположите руки перед собой на уровне груди.',
+                    'Расположите руки перед собой на уровне груди, убедитесь что освещение достаточное.',
                     Colors.blue,
                   ),
                   SizedBox(height: 8),
-                  _buildStepCard(
+                  _buildInstructionCard(
                     '2',
                     'Выполнение',
-                    'Сформируйте жест как показано на изображении, обратите внимание на положение пальцев.',
+                    'Сформируйте жест как показано на изображении, обратите внимание на положение пальцев и кисти.',
                     Colors.green,
                   ),
                   SizedBox(height: 8),
-                  _buildStepCard(
+                  _buildInstructionCard(
                     '3',
                     'Движение',
-                    'Если жест динамический, выполните необходимое движение руками.',
+                    'Если жест требует движения, выполните его плавно и четко, как описано в инструкции.',
                     Colors.orange,
                   ),
                   SizedBox(height: 32),
+
+                  // Кнопка практики
                   SizedBox(
                     width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
+                    height: 54,
+                    child: ElevatedButton.icon(
                       onPressed: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => GesturePracticeScreen(
-                              gesture: gesture, // Передаем объект Gesture
+                              gesture: gesture,
                             ),
                           ),
                         );
                       },
+                      icon: Icon(Icons.camera_alt, size: 24),
+                      label: Text(
+                        'Практиковать с камерой',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepPurple,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
+                        elevation: 2,
                       ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.camera_alt),
-                          SizedBox(width: 8),
-                          Text(
-                            'Попрактиковаться с камерой',
-                            style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+
+                  // Дополнительная информация
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.blue[200]!),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.info, color: Colors.blue[700], size: 20),
+                            SizedBox(width: 8),
+                            Text(
+                              'Совет',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue[700],
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Для лучшего распознавания держите руку в хорошо освещенном месте и выполняйте жест четко и медленно.',
+                          style: TextStyle(
+                            color: Colors.blue[600],
+                            fontSize: 14,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -162,7 +192,50 @@ class GestureDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStepCard(String number, String title, String description, MaterialColor color) {
+  Widget _buildImagePlaceholder() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.gesture,
+            size: 80,
+            color: Colors.grey[400],
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Изображение жеста',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey[600],
+            ),
+          ),
+          SizedBox(height: 4),
+          Text(
+            'В демо-версии изображения не загружены',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[500],
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: Colors.grey[800],
+      ),
+    );
+  }
+
+  Widget _buildInstructionCard(String number, String title, String description, MaterialColor color) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -174,8 +247,8 @@ class GestureDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 32,
-              height: 32,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
                 color: color[100],
                 shape: BoxShape.circle,
@@ -186,6 +259,7 @@ class GestureDetailScreen extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: color[800],
+                    fontSize: 16,
                   ),
                 ),
               ),
@@ -200,12 +274,17 @@ class GestureDetailScreen extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
+                      color: Colors.grey[800],
                     ),
                   ),
-                  SizedBox(height: 4),
+                  SizedBox(height: 6),
                   Text(
                     description,
-                    style: TextStyle(height: 1.3),
+                    style: TextStyle(
+                      height: 1.4,
+                      color: Colors.grey[600],
+                      fontSize: 14,
+                    ),
                   ),
                 ],
               ),
@@ -214,5 +293,19 @@ class GestureDetailScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _getCategoryName(String category) {
+    const categoryNames = {
+      'basic': 'Базовые',
+      'greetings': 'Приветствие',
+      'questions': 'Вопросы',
+      'emotions': 'Эмоции',
+      'actions': 'Действия',
+      'family': 'Семья',
+      'food': 'Еда',
+      'numbers': 'Числа',
+    };
+    return categoryNames[category] ?? category;
   }
 }

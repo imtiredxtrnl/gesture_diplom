@@ -14,8 +14,8 @@ class GesturesScreen extends StatelessWidget {
         children: [
           _buildCategoryCard(
             context,
-            'Словарь жестов',
-            'Изучите основные жесты и их значения',
+            'Словник жестів',
+            'Вивчіть основні жести та їх значення',
             Icons.sign_language,
             Colors.purple[700]!,
                 () => Navigator.push(
@@ -26,8 +26,8 @@ class GesturesScreen extends StatelessWidget {
           SizedBox(height: 16),
           _buildCategoryCard(
             context,
-            'Практика жестов',
-            'Практикуйте жесты с использованием камеры и таймера',
+            'Практика жестів',
+            'Практикуйте жести з використанням камери та таймеру',
             Icons.camera_alt,
             Colors.teal[700]!,
                 () => Navigator.push(
@@ -38,8 +38,8 @@ class GesturesScreen extends StatelessWidget {
           SizedBox(height: 16),
           _buildCategoryCard(
             context,
-            'Алфавит',
-            'Изучите алфавит на языке жестов (украинский и английский)',
+            'Алфавіт',
+            'Вивчіть алфавіт на мові жестів (украинській и англійській)',
             Icons.text_fields,
             Colors.blue[700]!,
                 () => Navigator.push(
@@ -50,8 +50,8 @@ class GesturesScreen extends StatelessWidget {
           SizedBox(height: 16),
           _buildCategoryCard(
             context,
-            'Тесты',
-            'Проверьте свои знания языка жестов',
+            'Тести',
+            'Перевірте свої знання мови жестів',
             Icons.quiz,
             Colors.green[700]!,
                 () => Navigator.push(

@@ -6,7 +6,7 @@ class AlphabetSelectionScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Выбор алфавита'),
+        title: Text('Вибір алфавіту'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -14,8 +14,8 @@ class AlphabetSelectionScreen extends StatelessWidget {
           children: [
             _buildLanguageCard(
               context,
-              'Украинский алфавит',
-              'Изучите украинский дактильный алфавит',
+              'Український алфавіт',
+              'Вивчить український дактильний алфавіт',
               'assets/images/ukraine_flag.png',
               Colors.blue[700]!,
                   () => Navigator.push(
@@ -26,8 +26,8 @@ class AlphabetSelectionScreen extends StatelessWidget {
             SizedBox(height: 16),
             _buildLanguageCard(
               context,
-              'Английский алфавит',
-              'Изучите английский дактильный алфавит',
+              'Англійський алфавіт',
+              'Вивчить англійський дактильний алфавіт',
               'assets/images/uk_flag.png',
               Colors.red[700]!,
                   () => Navigator.push(

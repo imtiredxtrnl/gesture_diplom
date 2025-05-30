@@ -74,17 +74,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
         if (result['status'] == 'success') {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Профиль успешно обновлен')),
+            SnackBar(content: Text('Профіль успішно оновлено')),
           );
           Navigator.pop(context, true);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Ошибка при обновлении профиля: ${result['message']}')),
+            SnackBar(content: Text('Помилка при оновлені профіля: ${result['message']}')),
           );
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка при обновлении профиля: $e')),
+          SnackBar(content: Text('Помилка при оновлені профіля: $e')),
         );
       } finally {
         if (mounted) {
@@ -100,10 +100,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Редактирование профиля'),
+        title: Text('Редагування профіля'),
       ),
       body: _currentUser == null
-          ? Center(child: Text('Пользователь не авторизован'))
+          ? Center(child: Text('Користувач не авторизован'))
           : _isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -145,14 +145,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: 'Имя пользователя',
+                  labelText: 'Ім\'я користувача',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Пожалуйста, введите имя пользователя';
+                    return 'Будь-ласка, введіть ім\'я користувача';
                   }
                   return null;
                 },
@@ -169,7 +169,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                   ),
                   child: Text(
-                    'Сохранить изменения',
+                    'Зберегти зміни',
                     style: TextStyle(fontSize: 16),
                   ),
                 ),

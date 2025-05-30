@@ -59,7 +59,7 @@ class CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver 
   }
 
   void _connectWebSocket() {
-    print("CameraScreen: подключение к WebSocket");
+    print("CameraScreen: підключення до WebSocket");
     try {
       _channel = WebSocketChannel.connect(Uri.parse('ws://10.0.2.2:8765'));
       _channel!.stream.listen(
@@ -73,25 +73,25 @@ class CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver 
           _isProcessing = false;
         },
         onError: (error) {
-          print("CameraScreen: ошибка WebSocket: $error");
+          print("CameraScreen: помилка WebSocket: $error");
           setState(() {
-            _errorMessage = 'Ошибка соединения: $error';
+            _errorMessage = 'Помилка зїднання: $error';
           });
         },
         onDone: () {
-          print("CameraScreen: соединение WebSocket закрыто");
+          print("CameraScreen: зїднання WebSocket зачинено");
         },
       );
     } catch (e) {
-      print("CameraScreen: ошибка при создании WebSocket: $e");
+      print("CameraScreen: помилка при створені WebSocket: $e");
       setState(() {
-        _errorMessage = 'Ошибка подключения: $e';
+        _errorMessage = 'помилка підключення: $e';
       });
     }
   }
 
   Future<void> _initializeCamera() async {
-    print("CameraScreen: начало инициализации камеры");
+    print("CameraScreen: початок ініціалізації камери");
     setState(() {
       _isInitializing = true;
       _errorMessage = '';
@@ -112,10 +112,10 @@ class CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver 
       _connectWebSocket();
       _startFrameSendingLoop();
     } catch (e) {
-      print("CameraScreen: ошибка инициализации камеры: $e");
+      print("CameraScreen: помилка ініціалізації камери: $e");
       if (mounted) {
         setState(() {
-          _errorMessage = 'Ошибка инициализации камеры: $e';
+          _errorMessage = 'помилка ініціалізації камери: $e';
           _isInitializing = false;
         });
       }
@@ -123,7 +123,7 @@ class CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver 
   }
 
   void _startFrameSendingLoop() {
-    print("CameraScreen: запуск отправки кадров");
+    print("CameraScreen: запуск відправки кадрів");
 
     // Останавливаем предыдущий таймер, если он есть
     _frameTimer?.cancel();
@@ -166,21 +166,21 @@ class CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver 
   String _translateGesture(String gesture) {
     switch (gesture) {
       case 'No Hand':
-        return 'Жест не обнаружен';
+        return 'Жест не виявлено';
       case 'Open Palm':
-        return 'Открытая ладонь';
+        return 'Відкрита ладонь';
       case 'Fist':
         return 'Кулак';
       case 'Thumbs Up':
-        return 'Большой палец вверх';
+        return 'Великий палець вгору';
       case 'Victory':
-        return 'Жест победы';
+        return 'Жест перемоги';
       case 'Pointing':
-        return 'Указательный жест';
+        return 'Вказівний жест';
       case 'Rock':
         return 'Рок';
       case 'Unknown':
-        return 'Неизвестный жест';
+        return 'Невідомий жест';
       default:
         return gesture;
     }
@@ -228,7 +228,7 @@ class CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver 
                         ),
                         SizedBox(height: 16),
                         Text(
-                          'Инициализация камеры...',
+                          'Ініціалізація камери...',
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.grey[700],
@@ -262,7 +262,7 @@ class CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver 
                           SizedBox(height: 24),
                           ElevatedButton(
                             onPressed: _initializeCamera,
-                            child: Text('Попробовать снова'),
+                            child: Text('Спробувати знову'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.deepPurple,
                               foregroundColor: Colors.white,
@@ -293,7 +293,7 @@ class CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver 
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Камера не инициализирована',
+                            'Камера не ініціалізована',
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey[700],
@@ -302,7 +302,7 @@ class CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver 
                           SizedBox(height: 16),
                           ElevatedButton(
                             onPressed: _initializeCamera,
-                            child: Text('Инициализировать камеру'),
+                            child: Text('Ініціалізувати камеру'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.deepPurple,
                               foregroundColor: Colors.white,
@@ -338,7 +338,7 @@ class CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver 
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Распознанный жест:',
+                  'Роспізнаний жест:',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey[700],

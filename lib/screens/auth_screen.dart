@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'main_screen.dart';
+import 'register_screen.dart';
 import '../services/auth_service.dart';
 
 class AuthScreen extends StatefulWidget {
@@ -53,13 +54,13 @@ class _AuthScreenState extends State<AuthScreen> {
       } else {
         setState(() {
           _isLoading = false;
-          _errorMessage = result['message'] ?? result['status'] ?? 'Ошибка авторизации';
+          _errorMessage = result['message'] ?? result['status'] ?? 'Помилка авторизації';
         });
       }
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Ошибка подключения: $e';
+        _errorMessage = 'Помилка підключення: $e';
       });
     }
   }
@@ -70,7 +71,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
     if (email.isEmpty || password.isEmpty) {
       setState(() {
-        _errorMessage = 'Введите email и пароль';
+        _errorMessage = 'Введіть електронну пошту та пароль';
       });
       return;
     }
@@ -81,6 +82,13 @@ class _AuthScreenState extends State<AuthScreen> {
     });
 
     await _loginWithCredentials(email, password);
+  }
+
+  void _navigateToRegister() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => RegisterScreen()),
+    );
   }
 
   @override
@@ -101,13 +109,13 @@ class _AuthScreenState extends State<AuthScreen> {
                 color: Colors.deepPurple,
               ),
               SizedBox(height: 24),
-              Text('Вход в приложение',
+              Text('Вхід до застосунку',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               SizedBox(height: 24),
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
-                  labelText: 'Email',
+                  labelText: 'Електронна пошта',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -133,42 +141,27 @@ class _AuthScreenState extends State<AuthScreen> {
                 child: ElevatedButton(
                   onPressed: _login,
                   style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text('Войти', style: TextStyle(fontSize: 16)),
+                  child: Text('Увійти', style: TextStyle(fontSize: 16)),
                 ),
               ),
               SizedBox(height: 16),
-              Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.blue[50],
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      'Для демонстрации используйте:',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.blue[800],
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Пользователь: user@example.com / user123',
-                      style: TextStyle(fontSize: 12, color: Colors.blue[700]),
-                    ),
-                    Text(
-                      'Админ: admin@example.com / admin123',
-                      style: TextStyle(fontSize: 12, color: Colors.blue[700]),
-                    ),
-                  ],
+              TextButton(
+                onPressed: _navigateToRegister,
+                child: Text(
+                  'Немає акаунту? Зареєструватися',
+                  style: TextStyle(
+                    color: Colors.deepPurple,
+                    fontSize: 16,
+                  ),
                 ),
               ),
+              SizedBox(height: 16),
               if (_errorMessage.isNotEmpty) ...[
                 SizedBox(height: 16),
                 Container(

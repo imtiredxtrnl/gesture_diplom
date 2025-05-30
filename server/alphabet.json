@@ -1,0 +1,198 @@
+{
+    "uk_а": {
+        "id": "uk_а",
+        "letter": "А",
+        "language": "uk",
+        "imagePath": "assets/alphabet/uk/а.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "uk_б": {
+        "id": "uk_б",
+        "letter": "Б",
+        "language": "uk",
+        "imagePath": "assets/alphabet/uk/б.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "uk_в": {
+        "id": "uk_в",
+        "letter": "В",
+        "language": "uk",
+        "imagePath": "assets/alphabet/uk/в.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "uk_г": {
+        "id": "uk_г",
+        "letter": "Г",
+        "language": "uk",
+        "imagePath": "assets/alphabet/uk/г.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "uk_д": {
+        "id": "uk_д",
+        "letter": "Д",
+        "language": "uk",
+        "imagePath": "assets/alphabet/uk/д.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "uk_е": {
+        "id": "uk_е",
+        "letter": "Е",
+        "language": "uk",
+        "imagePath": "assets/alphabet/uk/е.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "uk_є": {
+        "id": "uk_є",
+        "letter": "Є",
+        "language": "uk",
+        "imagePath": "assets/alphabet/uk/є.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "uk_ж": {
+        "id": "uk_ж",
+        "letter": "Ж",
+        "language": "uk",
+        "imagePath": "assets/alphabet/uk/ж.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "uk_з": {
+        "id": "uk_з",
+        "letter": "З",
+        "language": "uk",
+        "imagePath": "assets/alphabet/uk/з.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "uk_и": {
+        "id": "uk_и",
+        "letter": "И",
+        "language": "uk",
+        "imagePath": "assets/alphabet/uk/и.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "uk_і": {
+        "id": "uk_і",
+        "letter": "І",
+        "language": "uk",
+        "imagePath": "assets/alphabet/uk/і.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "uk_ї": {
+        "id": "uk_ї",
+        "letter": "Ї",
+        "language": "uk",
+        "imagePath": "assets/alphabet/uk/ї.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "uk_й": {
+        "id": "uk_й",
+        "letter": "Й",
+        "language": "uk",
+        "imagePath": "assets/alphabet/uk/й.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "uk_к": {
+        "id": "uk_к",
+        "letter": "К",
+        "language": "uk",
+        "imagePath": "assets/alphabet/uk/к.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "uk_л": {
+        "id": "uk_л",
+        "letter": "Л",
+        "language": "uk",
+        "imagePath": "assets/alphabet/uk/л.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "en_a": {
+        "id": "en_a",
+        "letter": "A",
+        "language": "en",
+        "imagePath": "assets/alphabet/en/a.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "en_b": {
+        "id": "en_b",
+        "letter": "B",
+        "language": "en",
+        "imagePath": "assets/alphabet/en/b.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "en_c": {
+        "id": "en_c",
+        "letter": "C",
+        "language": "en",
+        "imagePath": "assets/alphabet/en/c.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "en_d": {
+        "id": "en_d",
+        "letter": "D",
+        "language": "en",
+        "imagePath": "assets/alphabet/en/d.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "en_e": {
+        "id": "en_e",
+        "letter": "E",
+        "language": "en",
+        "imagePath": "assets/alphabet/en/e.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "en_f": {
+        "id": "en_f",
+        "letter": "F",
+        "language": "en",
+        "imagePath": "assets/alphabet/en/f.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "en_g": {
+        "id": "en_g",
+        "letter": "G",
+        "language": "en",
+        "imagePath": "assets/alphabet/en/g.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "en_h": {
+        "id": "en_h",
+        "letter": "H",
+        "language": "en",
+        "imagePath": "assets/alphabet/en/h.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "en_i": {
+        "id": "en_i",
+        "letter": "I",
+        "language": "en",
+        "imagePath": "assets/alphabet/en/i.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "en_j": {
+        "id": "en_j",
+        "letter": "J",
+        "language": "en",
+        "imagePath": "assets/alphabet/en/j.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "en_k": {
+        "id": "en_k",
+        "letter": "K",
+        "language": "en",
+        "imagePath": "assets/alphabet/en/k.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "en_l": {
+        "id": "en_l",
+        "letter": "L",
+        "language": "en",
+        "imagePath": "assets/alphabet/en/l.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "en_m": {
+        "id": "en_m",
+        "letter": "M",
+        "language": "en",
+        "imagePath": "assets/alphabet/en/m.png",
+        "created_at": "2025-05-30T21:46:31.566625"
+    }
+}

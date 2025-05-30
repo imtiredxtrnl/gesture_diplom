@@ -7,9 +7,14 @@ import numpy as np
 import json
 import hashlib
 import os
+import uuid
+from datetime import datetime
 
-# Путь к файлу с данными пользователей
+# Путь к файлам данных
 USER_DATA_FILE = 'users.json'
+GESTURES_DATA_FILE = 'gestures.json'
+TESTS_DATA_FILE = 'tests.json'
+ALPHABET_DATA_FILE = 'alphabet.json'
 
 # Инициализация MediaPipe Hands
 import mediapipe as mp
@@ -17,17 +22,16 @@ mp_hands = mp.solutions.hands
 mp_drawing = mp.solutions.drawing_utils
 hands = mp_hands.Hands(static_image_mode=False, max_num_hands=1, min_detection_confidence=0.7)
 
-def load_users():
-    if os.path.exists(USER_DATA_FILE):
-        with open(USER_DATA_FILE, 'r', encoding='utf-8') as f:
+def load_json_file(file_path):
+    if os.path.exists(file_path):
+        with open(file_path, 'r', encoding='utf-8') as f:
             return json.load(f)
     return {}
 
-def save_users(users):
-    with open(USER_DATA_FILE, 'w', encoding='utf-8') as f:
-        json.dump(users, f, indent=4, ensure_ascii=False)
+def save_json_file(file_path, data):
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=4, ensure_ascii=False)
 
-# Функция для хеширования пароля (для безопасности)
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
@@ -67,9 +71,7 @@ def process_frame(frame):
             return gesture
     return "No Hand"
 
-# Функции для обработки различных типов запросов
-
-# Обработка запросов на аутентификацию
+# ============== AUTH HANDLERS ==============
 def handle_auth_request(request, users):
     action = request.get('action', 'login')
 
@@ -115,14 +117,14 @@ def handle_auth_request(request, users):
             "role": role,
             "completedTests": []
         }
-        save_users(users)
+        save_json_file(USER_DATA_FILE, users)
         print(f"User registered: {email}")
 
         return {"status": "success", "message": "User registered successfully"}
 
     return {"status": "error", "message": "Invalid action"}
 
-# Обработка запросов на обновление данных пользователя
+# ============== USER HANDLERS ==============
 def handle_user_request(request, users):
     action = request.get('action')
 
@@ -132,7 +134,7 @@ def handle_user_request(request, users):
 
         if username in users:
             users[username]["completedTests"] = completed_tests
-            save_users(users)
+            save_json_file(USER_DATA_FILE, users)
             print(f"Updated tests for {username}: {len(completed_tests)} tests")
             return {"status": "success", "message": "Tests updated successfully"}
         else:
@@ -145,18 +147,16 @@ def handle_user_request(request, users):
         if username in users:
             user_data = users[username]
 
-            # Обновляем имя пользователя (если оно изменилось)
             new_username = data.get('username')
             if new_username and new_username != username:
                 users[new_username] = user_data
                 del users[username]
                 username = new_username
 
-            # Обновляем фото профиля, если оно предоставлено
             if 'profileImage' in data:
                 users[username]['photo'] = data['profileImage']
 
-            save_users(users)
+            save_json_file(USER_DATA_FILE, users)
             print(f"Profile updated for {username}")
 
             return {
@@ -178,7 +178,7 @@ def handle_user_request(request, users):
 
         if username in users:
             users[username]["completedTests"] = []
-            save_users(users)
+            save_json_file(USER_DATA_FILE, users)
             print(f"Tests reset for {username}")
             return {"status": "success", "message": "Tests reset successfully"}
         else:
@@ -186,10 +186,269 @@ def handle_user_request(request, users):
 
     return {"status": "error", "message": "Invalid action"}
 
-# Обработчик входящих соединений
+# ============== GESTURE HANDLERS ==============
+def handle_gesture_request(request):
+    action = request.get('action')
+
+    if action == 'get_all':
+        gestures = load_json_file(GESTURES_DATA_FILE)
+        return {
+            "status": "success",
+            "gestures": list(gestures.values()) if isinstance(gestures, dict) else gestures
+        }
+
+    elif action == 'create':
+        gestures = load_json_file(GESTURES_DATA_FILE)
+        if not isinstance(gestures, dict):
+            gestures = {}
+
+        gesture_id = str(uuid.uuid4())
+        gesture_data = {
+            "id": gesture_id,
+            "name": request.get('name', ''),
+            "description": request.get('description', ''),
+            "category": request.get('category', 'basic'),
+            "imagePath": request.get('imagePath', ''),
+            "created_at": datetime.now().isoformat()
+        }
+
+        gestures[gesture_id] = gesture_data
+        save_json_file(GESTURES_DATA_FILE, gestures)
+
+        return {
+            "status": "success",
+            "message": "Gesture created successfully",
+            "gesture": gesture_data
+        }
+
+    elif action == 'update':
+        gestures = load_json_file(GESTURES_DATA_FILE)
+        gesture_id = request.get('id')
+
+        if gesture_id in gestures:
+            gesture_data = gestures[gesture_id]
+            gesture_data.update({
+                "name": request.get('name', gesture_data.get('name')),
+                "description": request.get('description', gesture_data.get('description')),
+                "category": request.get('category', gesture_data.get('category')),
+                "imagePath": request.get('imagePath', gesture_data.get('imagePath')),
+                "updated_at": datetime.now().isoformat()
+            })
+
+            gestures[gesture_id] = gesture_data
+            save_json_file(GESTURES_DATA_FILE, gestures)
+
+            return {
+                "status": "success",
+                "message": "Gesture updated successfully",
+                "gesture": gesture_data
+            }
+        else:
+            return {"status": "error", "message": "Gesture not found"}
+
+    elif action == 'delete':
+        gestures = load_json_file(GESTURES_DATA_FILE)
+        gesture_id = request.get('id')
+
+        if gesture_id in gestures:
+            deleted_gesture = gestures.pop(gesture_id)
+            save_json_file(GESTURES_DATA_FILE, gestures)
+
+            return {
+                "status": "success",
+                "message": "Gesture deleted successfully",
+                "gesture": deleted_gesture
+            }
+        else:
+            return {"status": "error", "message": "Gesture not found"}
+
+    # Обработка распознавания жестов (существующий код)
+    elif 'image' in request:
+        try:
+            img_data = base64.b64decode(request.get('image'))
+            np_arr = np.frombuffer(img_data, np.uint8)
+            frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
+            if frame is not None:
+                gesture = process_frame(frame)
+                return {"gesture": gesture}
+            else:
+                return {"gesture": "Error decoding frame"}
+        except Exception as e:
+            print(f"Error processing gesture: {e}")
+            return {"gesture": "Error processing image"}
+
+    return {"status": "error", "message": "Invalid gesture action"}
+
+# ============== TEST HANDLERS ==============
+def handle_test_request(request):
+    action = request.get('action')
+
+    if action == 'get_all':
+        tests = load_json_file(TESTS_DATA_FILE)
+        return {
+            "status": "success",
+            "tests": list(tests.values()) if isinstance(tests, dict) else tests
+        }
+
+    elif action == 'create':
+        tests = load_json_file(TESTS_DATA_FILE)
+        if not isinstance(tests, dict):
+            tests = {}
+
+        test_id = str(uuid.uuid4())
+        test_data = {
+            "id": test_id,
+            "question": request.get('question', ''),
+            "options": request.get('options', []),
+            "correctOptionIndex": request.get('correctOptionIndex', 0),
+            "category": request.get('category', 'basic'),
+            "imagePath": request.get('imagePath', ''),
+            "created_at": datetime.now().isoformat()
+        }
+
+        tests[test_id] = test_data
+        save_json_file(TESTS_DATA_FILE, tests)
+
+        return {
+            "status": "success",
+            "message": "Test created successfully",
+            "test": test_data
+        }
+
+    elif action == 'update':
+        tests = load_json_file(TESTS_DATA_FILE)
+        test_id = request.get('id')
+
+        if test_id in tests:
+            test_data = tests[test_id]
+            test_data.update({
+                "question": request.get('question', test_data.get('question')),
+                "options": request.get('options', test_data.get('options')),
+                "correctOptionIndex": request.get('correctOptionIndex', test_data.get('correctOptionIndex')),
+                "category": request.get('category', test_data.get('category')),
+                "imagePath": request.get('imagePath', test_data.get('imagePath')),
+                "updated_at": datetime.now().isoformat()
+            })
+
+            tests[test_id] = test_data
+            save_json_file(TESTS_DATA_FILE, tests)
+
+            return {
+                "status": "success",
+                "message": "Test updated successfully",
+                "test": test_data
+            }
+        else:
+            return {"status": "error", "message": "Test not found"}
+
+    elif action == 'delete':
+        tests = load_json_file(TESTS_DATA_FILE)
+        test_id = request.get('id')
+
+        if test_id in tests:
+            deleted_test = tests.pop(test_id)
+            save_json_file(TESTS_DATA_FILE, tests)
+
+            return {
+                "status": "success",
+                "message": "Test deleted successfully",
+                "test": deleted_test
+            }
+        else:
+            return {"status": "error", "message": "Test not found"}
+
+    return {"status": "error", "message": "Invalid test action"}
+
+# ============== ALPHABET HANDLERS ==============
+def handle_alphabet_request(request):
+    action = request.get('action')
+
+    if action == 'get_all':
+        alphabet = load_json_file(ALPHABET_DATA_FILE)
+        language = request.get('language', 'all')
+
+        if language != 'all' and isinstance(alphabet, dict):
+            filtered_alphabet = {k: v for k, v in alphabet.items() if v.get('language') == language}
+            return {
+                "status": "success",
+                "letters": list(filtered_alphabet.values())
+            }
+
+        return {
+            "status": "success",
+            "letters": list(alphabet.values()) if isinstance(alphabet, dict) else alphabet
+        }
+
+    elif action == 'create':
+        alphabet = load_json_file(ALPHABET_DATA_FILE)
+        if not isinstance(alphabet, dict):
+            alphabet = {}
+
+        letter_id = str(uuid.uuid4())
+        letter_data = {
+            "id": letter_id,
+            "letter": request.get('letter', ''),
+            "language": request.get('language', 'uk'),
+            "imagePath": request.get('imagePath', ''),
+            "created_at": datetime.now().isoformat()
+        }
+
+        alphabet[letter_id] = letter_data
+        save_json_file(ALPHABET_DATA_FILE, alphabet)
+
+        return {
+            "status": "success",
+            "message": "Letter created successfully",
+            "letter": letter_data
+        }
+
+    elif action == 'update':
+        alphabet = load_json_file(ALPHABET_DATA_FILE)
+        letter_id = request.get('id')
+
+        if letter_id in alphabet:
+            letter_data = alphabet[letter_id]
+            letter_data.update({
+                "letter": request.get('letter', letter_data.get('letter')),
+                "language": request.get('language', letter_data.get('language')),
+                "imagePath": request.get('imagePath', letter_data.get('imagePath')),
+                "updated_at": datetime.now().isoformat()
+            })
+
+            alphabet[letter_id] = letter_data
+            save_json_file(ALPHABET_DATA_FILE, alphabet)
+
+            return {
+                "status": "success",
+                "message": "Letter updated successfully",
+                "letter": letter_data
+            }
+        else:
+            return {"status": "error", "message": "Letter not found"}
+
+    elif action == 'delete':
+        alphabet = load_json_file(ALPHABET_DATA_FILE)
+        letter_id = request.get('id')
+
+        if letter_id in alphabet:
+            deleted_letter = alphabet.pop(letter_id)
+            save_json_file(ALPHABET_DATA_FILE, alphabet)
+
+            return {
+                "status": "success",
+                "message": "Letter deleted successfully",
+                "letter": deleted_letter
+            }
+        else:
+            return {"status": "error", "message": "Letter not found"}
+
+    return {"status": "error", "message": "Invalid alphabet action"}
+
+# ============== MAIN HANDLER ==============
 async def handle_connection(websocket):
     print(f"Client connected from {websocket.remote_address}")
-    users = load_users()
+    users = load_json_file(USER_DATA_FILE)
 
     try:
         async for message in websocket:
@@ -208,32 +467,15 @@ async def handle_connection(websocket):
                     await websocket.send(json.dumps(response))
 
                 elif request_type == 'gesture':
-                    if request.get('action'):
-                        # Это запрос на управление контентом жестов от админа
-                        response = {"status": "success", "message": "Gesture action processed"}
-                        await websocket.send(json.dumps(response))
-                    else:
-                        # Обрабатываем запрос на обработку фреймов с камеры
-                        try:
-                            img_data = base64.b64decode(request.get('image'))
-                            np_arr = np.frombuffer(img_data, np.uint8)
-                            frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-
-                            if frame is not None:
-                                gesture = process_frame(frame)
-                                await websocket.send(json.dumps({"gesture": gesture}))
-                            else:
-                                await websocket.send(json.dumps({"gesture": "Error decoding frame"}))
-                        except Exception as e:
-                            print(f"Error processing gesture: {e}")
-                            await websocket.send(json.dumps({"gesture": "Error processing image"}))
-
-                elif request_type == 'alphabet':
-                    response = {"status": "success", "message": "Alphabet action processed"}
+                    response = handle_gesture_request(request)
                     await websocket.send(json.dumps(response))
 
                 elif request_type == 'test':
-                    response = {"status": "success", "message": "Test action processed"}
+                    response = handle_test_request(request)
+                    await websocket.send(json.dumps(response))
+
+                elif request_type == 'alphabet':
+                    response = handle_alphabet_request(request)
                     await websocket.send(json.dumps(response))
 
                 else:
@@ -259,7 +501,7 @@ async def main():
     os.makedirs('data/alphabet/en', exist_ok=True)
     os.makedirs('data/tests', exist_ok=True)
 
-    # Проверяем наличие файла с пользователями, создаем если его нет
+    # Проверяем наличие файлов данных, создаем если их нет
     if not os.path.exists(USER_DATA_FILE):
         default_users = {
             "user@example.com": {
@@ -277,8 +519,24 @@ async def main():
                 "completedTests": []
             }
         }
-        save_users(default_users)
+        save_json_file(USER_DATA_FILE, default_users)
         print(f"Created default users file: {USER_DATA_FILE}")
+
+    # Создаем файлы для жестов, тестов и алфавита, если их нет
+    if not os.path.exists(GESTURES_DATA_FILE):
+        default_gestures = {}
+        save_json_file(GESTURES_DATA_FILE, default_gestures)
+        print(f"Created gestures file: {GESTURES_DATA_FILE}")
+
+    if not os.path.exists(TESTS_DATA_FILE):
+        default_tests = {}
+        save_json_file(TESTS_DATA_FILE, default_tests)
+        print(f"Created tests file: {TESTS_DATA_FILE}")
+
+    if not os.path.exists(ALPHABET_DATA_FILE):
+        default_alphabet = {}
+        save_json_file(ALPHABET_DATA_FILE, default_alphabet)
+        print(f"Created alphabet file: {ALPHABET_DATA_FILE}")
 
     print("Starting WebSocket server on ws://0.0.0.0:8765")
     async with websockets.serve(handle_connection, "0.0.0.0", 8765):

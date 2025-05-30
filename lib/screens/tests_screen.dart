@@ -23,43 +23,69 @@ class _TestsScreenState extends State<TestsScreen> {
 
   Future<void> _loadTests() async {
     try {
-      // Создаем тестовые данные, так как у нас нет JSON файла
+      // Создаем тестовые данные без изображений
       List<Test> testData = [
         Test(
           id: '1',
-          question: 'Какой жест обозначает "Привет"?',
-          imagePath: 'assets/tests/test1.png',
+          question: 'Який жест означає "Привіт"?',
+          imagePath: '', // Убираем путь к изображению
           options: [
-            'Поднятая рука с раскрытой ладонью',
-            'Сжатый кулак',
-            'Указательный палец направлен вверх',
-            'Две руки скрещены на груди'
+            'Піднята рука з розкритою долонею',
+            'Стиснутий кулак',
+            'Вказівний палець направлений вгору',
+            'Дві руки схрещені на грудях'
           ],
           correctOptionIndex: 0,
           category: 'greetings',
         ),
         Test(
           id: '2',
-          question: 'Какой жест обозначает "Спасибо"?',
-          imagePath: 'assets/tests/test2.png',
+          question: 'Який жест означає "Дякую"?',
+          imagePath: '', // Убираем путь к изображению
           options: [
-            'Сжатый кулак',
-            'Рука прикладывается к губам и затем опускается вперед',
-            'Руки скрещены над головой',
-            'Большой палец вверх'
+            'Стиснутий кулак',
+            'Рука прикладається до губ і потім опускається вперед',
+            'Руки схрещені над головою',
+            'Великий палець вгору'
           ],
           correctOptionIndex: 1,
           category: 'basic',
         ),
         Test(
           id: '3',
-          question: 'Какой жест означает "Да"?',
-          imagePath: 'assets/tests/test3.png',
+          question: 'Який жест означає "Так"?',
+          imagePath: '', // Убираем путь к изображению
           options: [
-            'Качание головой влево-вправо',
-            'Кивание головой вверх-вниз',
-            'Поднятие плеч',
-            'Указание пальцем'
+            'Хитання головою ліворуч-праворуч',
+            'Кивання головою вгору-вниз',
+            'Підняття плечей',
+            'Вказування пальцем'
+          ],
+          correctOptionIndex: 1,
+          category: 'basic',
+        ),
+        Test(
+          id: '4',
+          question: 'Як показати жест "Ні"?',
+          imagePath: '',
+          options: [
+            'Вказівний палець з боку в бік',
+            'Похитати головою',
+            'Схрестити руки',
+            'Заплющити очі'
+          ],
+          correctOptionIndex: 0,
+          category: 'basic',
+        ),
+        Test(
+          id: '5',
+          question: 'Який жест використовується для "Будь ласка"?',
+          imagePath: '',
+          options: [
+            'Поклін головою',
+            'Відкрита долоня на грудях з круговим рухом',
+            'Схрещені пальці',
+            'Підняті брови'
           ],
           correctOptionIndex: 1,
           category: 'basic',
@@ -85,100 +111,214 @@ class _TestsScreenState extends State<TestsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Тесты'),
+        title: Text('Тести'),
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : tests.isEmpty
-          ? Center(child: Text('Тесты не найдены'))
-          : ListView.builder(
-        padding: EdgeInsets.all(16),
-        itemCount: tests.length,
-        itemBuilder: (context, index) {
-          final test = tests[index];
-          final bool isCompleted = completedTests.contains(test.id);
-
-          return Card(
-            margin: EdgeInsets.only(bottom: 16),
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(
-                color: isCompleted ? Colors.green : Colors.transparent,
-                width: isCompleted ? 2 : 0,
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.quiz,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Тести не знайдено',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey[600],
               ),
             ),
-            child: InkWell(
-              onTap: () async {
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => TestDetailScreen(test: test),
-                  ),
-                );
-
-                if (result == true) {
-                  // Тест был пройден, обновляем UI
-                  setState(() {
-                    if (!completedTests.contains(test.id)) {
-                      completedTests.add(test.id);
-                    }
-                  });
-                }
-              },
+          ],
+        ),
+      )
+          : Column(
+        children: [
+          // Информационная панель
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(16),
+            margin: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.blue[50],
               borderRadius: BorderRadius.circular(12),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
+              border: Border.all(color: Colors.blue[200]!),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Icon(
-                        Icons.quiz,
-                        size: 30,
-                        color: Colors.grey[600],
+                    Icon(Icons.info, color: Colors.blue[700]),
+                    SizedBox(width: 8),
+                    Text(
+                      'Інформація про тести',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue[700],
                       ),
                     ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                  ],
+                ),
+                SizedBox(height: 8),
+                Text(
+                  'Всього тестів: ${tests.length}\nПройдено: ${completedTests.length}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.blue[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Список тестов
+          Expanded(
+            child: ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              itemCount: tests.length,
+              itemBuilder: (context, index) {
+                final test = tests[index];
+                final bool isCompleted = completedTests.contains(test.id);
+
+                return Card(
+                  margin: EdgeInsets.only(bottom: 12),
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: isCompleted ? Colors.green[300]! : Colors.transparent,
+                      width: isCompleted ? 2 : 0,
+                    ),
+                  ),
+                  child: InkWell(
+                    onTap: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TestDetailScreen(test: test),
+                        ),
+                      );
+
+                      if (result == true) {
+                        // Тест был пройден, обновляем UI
+                        setState(() {
+                          if (!completedTests.contains(test.id)) {
+                            completedTests.add(test.id);
+                          }
+                        });
+                      }
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
                         children: [
-                          Text(
-                            test.question,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                          // Иконка теста
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: isCompleted
+                                  ? Colors.green[100]
+                                  : Colors.deepPurple[100],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              isCompleted ? Icons.quiz_outlined : Icons.quiz,
+                              size: 30,
+                              color: isCompleted
+                                  ? Colors.green[700]
+                                  : Colors.deepPurple[700],
                             ),
                           ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Категория: ${test.category}',
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 14,
+                          SizedBox(width: 16),
+
+                          // Информация о тесте
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  test.question,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Colors.grey[800],
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                SizedBox(height: 6),
+
+                                // Категория
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[200],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    'Категорія: ${test.category}',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+
+                                // Количество вариантов
+                                Text(
+                                  'Варіантів відповіді: ${test.options.length}',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
+
+                          // Статус прохождения
+                          if (isCompleted)
+                            Container(
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.check,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            )
+                          else
+                            Icon(
+                              Icons.arrow_forward_ios,
+                              color: Colors.grey[400],
+                              size: 16,
+                            ),
                         ],
                       ),
                     ),
-                    if (isCompleted)
-                      Icon(
-                        Icons.check_circle,
-                        color: Colors.green,
-                        size: 24,
-                      ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }

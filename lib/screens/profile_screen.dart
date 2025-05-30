@@ -99,7 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           SizedBox(height: 8),
           Text(
-            _isAdmin ? 'Администратор' : 'Пользователь',
+            _isAdmin ? 'Адміністратор' : 'Користувач',
             style: TextStyle(
               fontSize: 16,
               color: _isAdmin ? Colors.deepPurple : Colors.grey[600],
@@ -126,7 +126,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           SizedBox(height: 16),
           Text(
-            'Вы не авторизованы',
+            'Ви не авторизованіі',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -134,7 +134,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           SizedBox(height: 8),
           Text(
-            'Пожалуйста, войдите в аккаунт',
+            'Будь-ласка, увійдіть в аккаунт',
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey[600],
@@ -148,7 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 MaterialPageRoute(builder: (context) => AuthScreen()),
               );
             },
-            child: Text('Войти'),
+            child: Text('Увійти'),
           ),
         ],
       ),
@@ -178,13 +178,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildStatCard(
-                  'Тестов пройдено',
+                  'Тестів пройдено',
                   '$_completedTests',
                   Icons.assignment_turned_in,
                   Colors.green,
                 ),
                 _buildStatCard(
-                  'Уровень',
+                  'Рівень',
                   _getLevel(),
                   Icons.star,
                   Colors.amber,
@@ -201,7 +201,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       children: [
         _buildActionButton(
-          'Редактировать профиль',
+          'Редагування профіля',
           Icons.edit,
           Colors.blue,
               () async {
@@ -216,7 +216,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         SizedBox(height: 12),
         _buildActionButton(
-          'Сбросить прогресс тестов',
+          'Скинути прогрес тестів',
           Icons.refresh,
           Colors.orange,
               () {
@@ -225,7 +225,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         SizedBox(height: 12),
         _buildActionButton(
-          'Выйти из аккаунта',
+          'Вийти з аккаунта',
           Icons.exit_to_app,
           Colors.red,
               () {
@@ -316,12 +316,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Сбросить прогресс'),
-        content: Text('Вы уверены, что хотите сбросить весь прогресс тестов? Это действие нельзя отменить.'),
+        title: Text('Скинути прогрес'),
+        content: Text('Ви впевнені, що хочете скинути увесь прогрес тестів? Цю дію неможна буде потім відмінити.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('ОТМЕНА'),
+            child: Text('ВІДМІНА'),
           ),
           TextButton(
             onPressed: () async {
@@ -330,10 +330,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               await AuthService.resetCompletedTests(_currentUser!.username);
               _loadUserData();
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Прогресс тестов сброшен')),
+                SnackBar(content: Text('Прогрес тестів скинуто')),
               );
             },
-            child: Text('СБРОСИТЬ'),
+            child: Text('СКИНУТИ'),
           ),
         ],
       ),
@@ -344,12 +344,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
-        title: Text('Выход из аккаунта'),
-          content: Text('Вы уверены, что хотите выйти из аккаунта?'),
+        title: Text('Вихід з аккаунту'),
+          content: Text('Ви впевнені, що хочете вийти з аккаунту?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('ОТМЕНА'),
+              child: Text('ВІДМІНА'),
             ),
             TextButton(
               onPressed: () async {
@@ -360,7 +360,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   MaterialPageRoute(builder: (context) => AuthScreen()),
                 );
               },
-              child: Text('ВЫЙТИ'),
+              child: Text('ВИЙТИ'),
             ),
           ],
         ),
@@ -368,9 +368,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   String _getLevel() {
-    if (_completedTests >= 15) return 'Эксперт';
-    if (_completedTests >= 10) return 'Продвинутый';
-    if (_completedTests >= 5) return 'Средний';
-    return 'Новичок';
+    if (_completedTests >= 15) return 'Експерт';
+    if (_completedTests >= 10) return 'Досвічений';
+    if (_completedTests >= 5) return 'Середній';
+    return 'Новачок';
   }
 }

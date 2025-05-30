@@ -1,3 +1,4 @@
+// lib/models/test_model.dart
 class Test {
   final String id;
   final String question;
@@ -9,7 +10,7 @@ class Test {
   Test({
     required this.id,
     required this.question,
-    required this.imagePath,
+    this.imagePath = '', // Значение по умолчанию
     required this.options,
     required this.correctOptionIndex,
     this.category = 'basic',
@@ -17,11 +18,13 @@ class Test {
 
   factory Test.fromJson(Map<String, dynamic> json) {
     return Test(
-      id: json['id'],
-      question: json['question'],
-      imagePath: json['imagePath'],
-      options: List<String>.from(json['options']),
-      correctOptionIndex: json['correctOptionIndex'],
+      id: json['id'] ?? '',
+      question: json['question'] ?? '',
+      imagePath: json['imagePath'] ?? '',
+      options: json['options'] != null
+          ? List<String>.from(json['options'])
+          : [],
+      correctOptionIndex: json['correctOptionIndex'] ?? 0,
       category: json['category'] ?? 'basic',
     );
   }
@@ -36,4 +39,38 @@ class Test {
       'category': category,
     };
   }
+
+  // Метод для создания копии с изменениями
+  Test copyWith({
+    String? id,
+    String? question,
+    String? imagePath,
+    List<String>? options,
+    int? correctOptionIndex,
+    String? category,
+  }) {
+    return Test(
+      id: id ?? this.id,
+      question: question ?? this.question,
+      imagePath: imagePath ?? this.imagePath,
+      options: options ?? this.options,
+      correctOptionIndex: correctOptionIndex ?? this.correctOptionIndex,
+      category: category ?? this.category,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'Test{id: $id, question: $question, category: $category}';
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+          other is Test &&
+              runtimeType == other.runtimeType &&
+              id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }
