@@ -21,8 +21,6 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Тест'),
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -34,56 +32,22 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Вопрос теста
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.deepPurple[50],
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.deepPurple[200]!),
-                      ),
-                      child: Text(
-                        widget.test.question,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple[800],
-                        ),
-                        textAlign: TextAlign.center,
+                    Text(
+                      widget.test.question,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 32),
-
-                    // Информация о категории
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Colors.blue[100],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        'Категорія: ${widget.test.category}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.blue[800],
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-
                     SizedBox(height: 24),
                     Text(
                       'Оберіть правильну відповідь:',
                       style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     SizedBox(height: 16),
-
-                    // Варианты ответов
                     ...List.generate(
                       widget.test.options.length,
                           (index) => _buildOptionCard(index),
@@ -92,10 +56,7 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
                 ),
               ),
             ),
-
             SizedBox(height: 16),
-
-            // Результат проверки
             if (isSubmitted)
               Container(
                 padding: EdgeInsets.all(16),
@@ -103,56 +64,34 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
                   color: isCorrect ? Colors.green[100] : Colors.red[100],
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Row(
-                  children: [
-                    Icon(
-                      isCorrect ? Icons.check_circle : Icons.cancel,
-                      color: isCorrect ? Colors.green[800] : Colors.red[800],
-                      size: 28,
-                    ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        isCorrect
-                            ? 'Правильно! Ви успішно пройшли цей тест.'
-                            : 'Неправильно. Спробуйте ще раз.',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: isCorrect ? Colors.green[800] : Colors.red[800],
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  isCorrect
+                      ? 'Правильно! Ви успішно пройшли цей тест.'
+                      : 'Неправильно. Спробуйте ще раз.',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: isCorrect ? Colors.green[800] : Colors.red[800],
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
               ),
-
             SizedBox(height: 16),
-
-            // Кнопка проверки/завершения
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: isSubmitted
-                    ? () => Navigator.pop(context, isCorrect)
-                    : selectedOptionIndex != null
-                    ? _checkAnswer
-                    : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: isSubmitted
-                      ? Colors.grey[600]
-                      : Colors.deepPurple,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 2,
+            ElevatedButton(
+              onPressed: isSubmitted
+                  ? () => Navigator.pop(context, isCorrect)
+                  : selectedOptionIndex != null
+                  ? _checkAnswer
+                  : null,
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
-                  isSubmitted ? 'Завершити' : 'Перевірити відповідь',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+              ),
+              child: Text(
+                isSubmitted ? 'Завершити' : 'Перевірити відповідь',
+                style: TextStyle(fontSize: 16),
               ),
             ),
           ],
@@ -166,86 +105,54 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
     final isSelected = selectedOptionIndex == index;
     final isCorrectOption = index == widget.test.correctOptionIndex;
 
-    // Определение цвета карточки в зависимости от состояния
+    // Визначення кольору картки залежно від стану
     Color cardColor = Colors.white;
-    Color borderColor = Colors.grey[300]!;
-
     if (isSubmitted) {
       if (isCorrectOption) {
-        cardColor = Colors.green[50]!;
-        borderColor = Colors.green[400]!;
+        cardColor = Colors.green[100]!;
       } else if (isSelected && !isCorrectOption) {
-        cardColor = Colors.red[50]!;
-        borderColor = Colors.red[400]!;
+        cardColor = Colors.red[100]!;
       }
     } else if (isSelected) {
-      cardColor = Colors.deepPurple[50]!;
-      borderColor = Colors.deepPurple[400]!;
+      cardColor = Colors.blue[50]!;
     }
 
-    return Container(
-      margin: EdgeInsets.only(bottom: 12),
-      child: Card(
-        elevation: isSelected ? 4 : 2,
-        color: cardColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: borderColor,
-            width: 2,
-          ),
+    return Card(
+      margin: EdgeInsets.only(bottom: 8),
+      elevation: isSelected ? 2 : 1,
+      color: cardColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: BorderSide(
+          color: isSelected
+              ? (isSubmitted
+              ? (isCorrectOption ? Colors.green : Colors.red)
+              : Colors.blue)
+              : Colors.transparent,
+          width: 2,
         ),
-        child: InkWell(
-          onTap: isSubmitted ? null : () => _selectOption(index),
-          borderRadius: BorderRadius.circular(12),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                // Номер варианта
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? (isSubmitted
-                        ? (isCorrectOption ? Colors.green : Colors.red)
-                        : Colors.deepPurple)
-                        : Colors.grey[300],
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '${index + 1}',
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : Colors.grey[700],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
+      ),
+      child: InkWell(
+        onTap: isSubmitted ? null : () => _selectOption(index),
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  option,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
-                SizedBox(width: 16),
-
-                // Текст варианта
-                Expanded(
-                  child: Text(
-                    option,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                      color: Colors.grey[800],
-                    ),
-                  ),
-                ),
-
-                // Иконки результата
-                if (isSubmitted && isCorrectOption)
-                  Icon(Icons.check_circle, color: Colors.green[600], size: 24),
-                if (isSubmitted && isSelected && !isCorrectOption)
-                  Icon(Icons.cancel, color: Colors.red[600], size: 24),
-              ],
-            ),
+              ),
+              if (isSubmitted && isCorrectOption)
+                Icon(Icons.check_circle, color: Colors.green),
+              if (isSubmitted && isSelected && !isCorrectOption)
+                Icon(Icons.cancel, color: Colors.red),
+            ],
           ),
         ),
       ),
@@ -267,7 +174,7 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
     });
 
     if (isCorrectAnswer) {
-      // Сохраняем пройденный тест
+      // Зберігаємо пройдений тест
       await AuthService.saveCompletedTest(widget.test.id);
     }
   }

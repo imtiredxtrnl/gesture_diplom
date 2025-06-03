@@ -1,24 +1,72 @@
-
 [
   {
     "id": "1",
-    "name": "Привіт",
-    "description": "Жест привітання, який використовується для початку розмови або при зустрічі з кимось.",
-    "imagePath": "assets/gestures/hello.png",
+    "name": "Привет",
+    "description": "Жест приветствия. Поднимите руку с раскрытой ладонью и помашите ей. Используется для начала разговора или при встрече с кем-то.",
+    "imagePath": "lib/assets/gestures/hello.png",
     "category": "greetings"
   },
   {
     "id": "2",
-    "name": "Дякую",
-    "description": "Жест подяки, який виражає вдячність за що-небудь.",
-    "imagePath": "assets/gestures/thank_you.png",
+    "name": "Спасибо",
+    "description": "Жест благодарности. Прикоснитесь пальцами к губам, затем опустите руку вперед. Выражает признательность за что-либо.",
+    "imagePath": "lib/assets/gestures/thank_you.png",
     "category": "basic"
   },
   {
     "id": "3",
-    "name": "Будь-ласка",
-    "description": "Жест ввічливого прохання або відповіді на подяку.",
-    "imagePath": "assets/gestures/please.png",
+    "name": "Пожалуйста",
+    "description": "Жест вежливой просьбы. Положите открытую ладонь на грудь и сделайте круговое движение. Используется для выражения просьбы или ответа на благодарность.",
+    "imagePath": "lib/assets/gestures/please.png",
     "category": "basic"
+  },
+  {
+    "id": "4",
+    "name": "Да",
+    "description": "Жест согласия. Покажите большой палец вверх или кивните головой. Выражает согласие или одобрение.",
+    "imagePath": "lib/assets/gestures/yes.png",
+    "category": "basic"
+  },
+  {
+    "id": "5",
+    "name": "Нет",
+    "description": "Жест отрицания. Покачайте головой или покажите указательным пальцем из стороны в сторону. Выражает несогласие или отрицание.",
+    "imagePath": "lib/assets/gestures/no.png",
+    "category": "basic"
+  },
+  {
+    "id": "6",
+    "name": "Хорошо",
+    "description": "Жест одобрения. Сформируйте кольцо из большого и указательного пальца. Означает, что все в порядке или хорошо.",
+    "imagePath": "lib/assets/gestures/ok.png",
+    "category": "emotions"
+  },
+  {
+    "id": "7",
+    "name": "Плохо",
+    "description": "Жест неодобрения. Покажите большой палец вниз. Выражает недовольство или негативную оценку.",
+    "imagePath": "lib/assets/gestures/bad.png",
+    "category": "emotions"
+  },
+  {
+    "id": "8",
+    "name": "Стоп",
+    "description": "Жест остановки. Поднимите руку с открытой ладонью перед собой. Используется для указания прекратить что-либо делать.",
+    "imagePath": "lib/assets/gestures/stop.png",
+    "category": "actions"
+  },
+  {
+    "id": "9",
+    "name": "Помощь",
+    "description": "Жест просьбы о помощи. Поднимите обе руки вверх. Используется когда нужна помощь или поддержка.",
+    "imagePath": "lib/assets/gestures/help.png",
+    "category": "actions"
+  },
+  {
+    "id": "10",
+    "name": "Любовь",
+    "description": "Жест выражения любви. Сложите руки в форме сердца или покажите знак 'я люблю тебя'. Выражает любовь и привязанность.",
+    "imagePath": "lib/assets/gestures/love.png",
+    "category": "emotions"
   }
 ]

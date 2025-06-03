@@ -3,13 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../models/gesture.dart';
-import '../services/admin_service.dart';
+import '../services/gesture_data_service.dart';
 
 class AddGestureScreen extends StatefulWidget {
-  final Gesture? gesture; // Если не null, то редактируем существующий жест
-
-  const AddGestureScreen({Key? key, this.gesture}) : super(key: key);
-
   @override
   _AddGestureScreenState createState() => _AddGestureScreenState();
 }
@@ -18,7 +14,7 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final AdminService _adminService = AdminService();
+  final GestureDataService _gestureService = GestureDataService();
 
   String _selectedCategory = 'basic';
   File? _imageFile;
@@ -35,28 +31,6 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
     'numbers',
   ];
 
-  final Map<String, String> _categoryLabels = {
-    'basic': 'Базовые',
-    'greetings': 'Приветствие',
-    'questions': 'Вопросы',
-    'emotions': 'Эмоции',
-    'actions': 'Действия',
-    'family': 'Семья',
-    'food': 'Еда',
-    'numbers': 'Числа',
-  };
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.gesture != null) {
-      // Заполняем поля для редактирования
-      _nameController.text = widget.gesture!.name;
-      _descriptionController.text = widget.gesture!.description;
-      _selectedCategory = widget.gesture!.category;
-    }
-  }
-
   @override
   void dispose() {
     _nameController.dispose();
@@ -64,19 +38,51 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 800,
-      maxHeight: 600,
-      imageQuality: 80,
-    );
+  String _getCategoryDisplayName(String category) {
+    switch (category) {
+      case 'basic':
+        return 'Основные';
+      case 'greetings':
+        return 'Приветствия';
+      case 'questions':
+        return 'Вопросы';
+      case 'emotions':
+        return 'Эмоции';
+      case 'actions':
+        return 'Действия';
+      case 'family':
+        return 'Семья';
+      case 'food':
+        return 'Еда';
+      case 'numbers':
+        return 'Числа';
+      default:
+        return category;
+    }
+  }
 
-    if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
+  Future<void> _pickImage() async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ошибка при выборе изображения: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -85,70 +91,44 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
       return;
     }
 
-    // Для демо версии не требуем обязательное изображение
-    /*if (_imageFile == null && widget.gesture == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Пожалуйста, выберите изображение жеста')),
-      );
-      return;
-    }*/
-
     setState(() {
       _isLoading = true;
     });
 
     try {
-      Map<String, dynamic> result;
+      // Создаем новый жест
+      final newGesture = _gestureService.createGesture(
+        name: _nameController.text.trim(),
+        description: _descriptionController.text.trim(),
+        category: _selectedCategory,
+        // В реальном приложении здесь была бы загрузка изображения на сервер
+        imagePath: _imageFile != null
+            ? 'lib/assets/gestures/${_nameController.text.toLowerCase().replaceAll(' ', '_')}.png'
+            : '',
+      );
 
-      // Путь к изображению (в реальном приложении здесь был бы upload на сервер)
-      String imagePath = widget.gesture?.imagePath?.isNotEmpty == true
-          ? widget.gesture!.imagePath
-          : 'assets/gestures/${_nameController.text.toLowerCase().replaceAll(' ', '_')}.png';
+      // Сохраняем жест
+      await _gestureService.addGesture(newGesture);
 
-      if (widget.gesture == null) {
-        // Создаем новый жест
-        result = await _adminService.createGesture(
-          name: _nameController.text.trim(),
-          description: _descriptionController.text.trim(),
-          category: _selectedCategory,
-          imagePath: imagePath,
-        );
-      } else {
-        // Обновляем существующий жест
-        result = await _adminService.updateGesture(
-          id: widget.gesture!.id,
-          name: _nameController.text.trim(),
-          description: _descriptionController.text.trim(),
-          category: _selectedCategory,
-          imagePath: imagePath,
-        );
-      }
-
-      if (result['status'] == 'success') {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(widget.gesture == null
-                ? 'Жест успешно добавлен!'
-                : 'Жест успешно обновлен!'),
+            content: Text('Жест "${newGesture.name}" успешно добавлен!'),
             backgroundColor: Colors.green,
           ),
         );
+
         Navigator.pop(context, true);
-      } else {
+      }
+    } catch (e) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Ошибка: ${result['message']}'),
+            content: Text('Ошибка при сохранении жеста: $e'),
             backgroundColor: Colors.red,
           ),
         );
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Ошибка при сохранении жеста: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
     } finally {
       if (mounted) {
         setState(() {
@@ -162,7 +142,7 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.gesture == null ? 'Добавить жест' : 'Редактировать жест'),
+        title: Text('Добавить жест'),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
       ),
@@ -184,7 +164,31 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionTitle('Основная информация'),
+              // Заголовок секции
+              Row(
+                children: [
+                  Icon(Icons.add_circle_outline, color: Colors.deepPurple),
+                  SizedBox(width: 8),
+                  Text(
+                    'Создание нового жеста',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepPurple,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 24),
+
+              // Данные жеста
+              Text(
+                'Основная информация',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               SizedBox(height: 16),
 
               // Название жеста
@@ -192,11 +196,11 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
                 controller: _nameController,
                 decoration: InputDecoration(
                   labelText: 'Название жеста *',
-                  hintText: 'Введите название жеста',
+                  hintText: 'Например: Привет, Спасибо...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  prefixIcon: Icon(Icons.gesture),
+                  prefixIcon: Icon(Icons.title),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -205,16 +209,27 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
                   if (value.trim().length < 2) {
                     return 'Название должно содержать минимум 2 символа';
                   }
+
+                  // Проверяем, нет ли уже жеста с таким названием
+                  final existingGestures = _gestureService.getAllGestures();
+                  final duplicateName = existingGestures.any(
+                        (gesture) => gesture.name.toLowerCase() == value.trim().toLowerCase(),
+                  );
+                  if (duplicateName) {
+                    return 'Жест с таким названием уже существует';
+                  }
+
                   return null;
                 },
               ),
+
               SizedBox(height: 16),
 
               // Категория
               DropdownButtonFormField<String>(
                 value: _selectedCategory,
                 decoration: InputDecoration(
-                  labelText: 'Категория',
+                  labelText: 'Категория *',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -223,7 +238,7 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
                 items: _categories.map((category) {
                   return DropdownMenuItem(
                     value: category,
-                    child: Text(_categoryLabels[category] ?? category),
+                    child: Text(_getCategoryDisplayName(category)),
                   );
                 }).toList(),
                 onChanged: (value) {
@@ -234,21 +249,22 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
                   }
                 },
               ),
+
               SizedBox(height: 16),
 
-              // Описание
+              // Описание жеста
               TextFormField(
                 controller: _descriptionController,
                 decoration: InputDecoration(
                   labelText: 'Описание жеста *',
-                  hintText: 'Опишите как выполняется жест',
+                  hintText: 'Подробное описание того, как выполнять жест...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   prefixIcon: Icon(Icons.description),
                   alignLabelWithHint: true,
                 ),
-                maxLines: 4,
+                maxLines: 5,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Пожалуйста, введите описание жеста';
@@ -259,18 +275,34 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
                   return null;
                 },
               ),
+
               SizedBox(height: 24),
 
-              _buildSectionTitle('Изображение жеста'),
+              // Изображение жеста
+              Text(
+                'Изображение жеста',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Добавьте изображение, демонстрирующее жест (необязательно)',
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                ),
+              ),
               SizedBox(height: 16),
 
-              // Изображение
+              // Контейнер для изображения
               InkWell(
                 onTap: _pickImage,
                 child: Container(
                   height: 200,
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: Colors.grey[50],
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: Colors.grey[300]!,
@@ -287,96 +319,148 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
                       width: double.infinity,
                     ),
                   )
-                      : widget.gesture?.imagePath?.isNotEmpty == true
-                      ? ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(
-                      widget.gesture!.imagePath,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      errorBuilder: (context, error, stackTrace) {
-                        return _buildImagePlaceholder();
-                      },
+                      : Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.add_photo_alternate,
+                          size: 48,
+                          color: Colors.grey[400],
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Нажмите, чтобы выбрать изображение',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 16,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'JPG, PNG до 5 МБ',
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
-                  )
-                      : _buildImagePlaceholder(),
+                  ),
                 ),
               ),
-              SizedBox(height: 8),
-              Text(
-                'Нажмите на область выше, чтобы выбрать изображение',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
+
+              if (_imageFile != null) ...[
+                SizedBox(height: 8),
+                Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Colors.green, size: 16),
+                    SizedBox(width: 4),
+                    Text(
+                      'Изображение выбрано',
+                      style: TextStyle(color: Colors.green, fontSize: 12),
+                    ),
+                    Spacer(),
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _imageFile = null;
+                        });
+                      },
+                      child: Text('Удалить'),
+                      style: TextButton.styleFrom(foregroundColor: Colors.red),
+                    ),
+                  ],
                 ),
-                textAlign: TextAlign.center,
-              ),
+              ],
+
               SizedBox(height: 32),
 
-              // Кнопка сохранения
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _saveGesture,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              // Кнопки действий
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _isLoading ? null : () => Navigator.pop(context),
+                      child: Text('Отмена'),
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                     ),
                   ),
-                  child: Text(
-                    widget.gesture == null ? 'Добавить жест' : 'Сохранить изменения',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _saveGesture,
+                      child: _isLoading
+                          ? SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                          : Text('Создать жест'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
                   ),
+                ],
+              ),
+
+              SizedBox(height: 16),
+
+              // Информационная подсказка
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue[50],
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue[200]!),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Совет',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue[700],
+                            ),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Создавайте четкие и понятные описания жестов. Это поможет пользователям лучше изучать язык жестов.',
+                            style: TextStyle(
+                              color: Colors.blue[600],
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String title) {
-    return Text(
-      title,
-      style: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: Colors.grey[800],
-      ),
-    );
-  }
-
-  Widget _buildImagePlaceholder() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.add_photo_alternate,
-            size: 48,
-            color: Colors.grey[400],
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Выберите изображение жеста',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 16,
-            ),
-          ),
-          SizedBox(height: 4),
-          Text(
-            '(необязательно для демо)',
-            style: TextStyle(
-              color: Colors.grey[500],
-              fontSize: 12,
-            ),
-          ),
-        ],
       ),
     );
   }

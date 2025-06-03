@@ -1,7 +1,7 @@
 // lib/screens/gesture_selection_screen.dart
 import 'package:flutter/material.dart';
 import '../models/gesture.dart';
-import '../services/admin_service.dart';
+import '../services/gesture_data_service.dart';
 import 'gesture_practice_screen.dart';
 
 class GestureSelectionScreen extends StatefulWidget {
@@ -10,13 +10,13 @@ class GestureSelectionScreen extends StatefulWidget {
 }
 
 class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
+  final GestureDataService _gestureService = GestureDataService();
   List<Gesture> gestures = [];
   bool isLoading = true;
   String searchQuery = '';
   String selectedCategory = 'all';
-  final AdminService _adminService = AdminService();
 
-  final List<String> categories = [
+  List<String> categories = [
     'all',
     'basic',
     'greetings',
@@ -28,22 +28,26 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
     'numbers',
   ];
 
-  final Map<String, String> categoryLabels = {
-    'all': 'Все',
-    'basic': 'Базовые',
-    'greetings': 'Приветствие',
-    'questions': 'Вопросы',
-    'emotions': 'Эмоции',
-    'actions': 'Действия',
-    'family': 'Семья',
-    'food': 'Еда',
-    'numbers': 'Числа',
-  };
-
   @override
   void initState() {
     super.initState();
     _loadGestures();
+
+    // Добавляем слушатель для обновлений
+    _gestureService.addListener(_onGesturesUpdated);
+  }
+
+  @override
+  void dispose() {
+    // Удаляем слушатель при уничтожении виджета
+    _gestureService.removeListener(_onGesturesUpdated);
+    super.dispose();
+  }
+
+  void _onGesturesUpdated() {
+    if (mounted) {
+      _loadGestures();
+    }
   }
 
   Future<void> _loadGestures() async {
@@ -52,126 +56,72 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
     });
 
     try {
-      // Пытаемся загрузить жесты с сервера
-      final loadedGestures = await _adminService.getAllGestures();
+      // Инициализируем жесты если они еще не загружены
+      await _gestureService.initializeGestures();
 
-      // Если с сервера ничего не пришло, используем тестовые данные
-      if (loadedGestures.isEmpty) {
-        final testGestures = _createTestGestures();
-        setState(() {
-          gestures = testGestures;
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          gestures = loadedGestures;
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      print('Error loading gestures: $e');
-      // В случае ошибки используем тестовые данные
-      final testGestures = _createTestGestures();
       setState(() {
-        gestures = testGestures;
+        gestures = _gestureService.getAllGestures();
         isLoading = false;
       });
-    }
-  }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('Error loading gestures: $e');
 
-  List<Gesture> _createTestGestures() {
-    return [
-      Gesture(
-        id: '1',
-        name: 'Привет',
-        description: 'Жест приветствия. Поднимите руку с раскрытой ладонью и помашите ей из стороны в сторону.',
-        imagePath: 'assets/gestures/hello.png',
-        category: 'greetings',
-      ),
-      Gesture(
-        id: '2',
-        name: 'Спасибо',
-        description: 'Жест благодарности. Прикоснитесь кончиками пальцев к губам, затем опустите руку вперед.',
-        imagePath: 'assets/gestures/thank_you.png',
-        category: 'basic',
-      ),
-      Gesture(
-        id: '3',
-        name: 'Пожалуйста',
-        description: 'Жест вежливой просьбы. Положите открытую ладонь на грудь и сделайте круговое движение.',
-        imagePath: 'assets/gestures/please.png',
-        category: 'basic',
-      ),
-      Gesture(
-        id: '4',
-        name: 'Да',
-        description: 'Жест согласия. Покажите большой палец вверх или кивните головой вверх-вниз.',
-        imagePath: 'assets/gestures/yes.png',
-        category: 'basic',
-      ),
-      Gesture(
-        id: '5',
-        name: 'Нет',
-        description: 'Жест отрицания. Покачайте головой из стороны в сторону или покажите указательным пальцем.',
-        imagePath: 'assets/gestures/no.png',
-        category: 'basic',
-      ),
-      Gesture(
-        id: '6',
-        name: 'Хорошо',
-        description: 'Жест одобрения. Сформируйте кольцо из большого и указательного пальца (знак ОК).',
-        imagePath: 'assets/gestures/ok.png',
-        category: 'emotions',
-      ),
-      Gesture(
-        id: '7',
-        name: 'Плохо',
-        description: 'Жест неодобрения. Покажите большой палец вниз.',
-        imagePath: 'assets/gestures/bad.png',
-        category: 'emotions',
-      ),
-      Gesture(
-        id: '8',
-        name: 'Стоп',
-        description: 'Жест остановки. Поднимите руку с открытой ладонью перед собой.',
-        imagePath: 'assets/gestures/stop.png',
-        category: 'actions',
-      ),
-      Gesture(
-        id: '9',
-        name: 'Помощь',
-        description: 'Жест просьбы о помощи. Поднимите обе руки вверх.',
-        imagePath: 'assets/gestures/help.png',
-        category: 'actions',
-      ),
-      Gesture(
-        id: '10',
-        name: 'Любовь',
-        description: 'Жест любви. Сложите руки в форме сердца.',
-        imagePath: 'assets/gestures/love.png',
-        category: 'emotions',
-      ),
-    ];
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка загрузки жестов: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   List<Gesture> get filteredGestures {
     List<Gesture> result = gestures;
 
-    // Фильтр по категории
+    // Фильтрация по категории
     if (selectedCategory != 'all') {
       result = result.where((gesture) => gesture.category == selectedCategory).toList();
     }
 
-    // Фильтр по поисковому запросу
+    // Фильтрация по поисковому запросу
     if (searchQuery.isNotEmpty) {
       result = result.where((gesture) =>
       gesture.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
-          gesture.description.toLowerCase().contains(searchQuery.toLowerCase()) ||
-          gesture.category.toLowerCase().contains(searchQuery.toLowerCase())
+          gesture.description.toLowerCase().contains(searchQuery.toLowerCase())
       ).toList();
     }
 
     return result;
+  }
+
+  String _getCategoryDisplayName(String category) {
+    switch (category) {
+      case 'all':
+        return 'Все';
+      case 'basic':
+        return 'Основные';
+      case 'greetings':
+        return 'Приветствия';
+      case 'questions':
+        return 'Вопросы';
+      case 'emotions':
+        return 'Эмоции';
+      case 'actions':
+        return 'Действия';
+      case 'family':
+        return 'Семья';
+      case 'food':
+        return 'Еда';
+      case 'numbers':
+        return 'Числа';
+      default:
+        return category;
+    }
   }
 
   @override
@@ -185,7 +135,7 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
           IconButton(
             icon: Icon(Icons.refresh),
             onPressed: _loadGestures,
-            tooltip: 'Обновить список жестов',
+            tooltip: 'Обновить',
           ),
         ],
       ),
@@ -196,10 +146,7 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
           children: [
             CircularProgressIndicator(color: Colors.deepPurple),
             SizedBox(height: 16),
-            Text(
-              'Загрузка жестов...',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
+            Text('Загрузка жестов...'),
           ],
         ),
       )
@@ -223,7 +170,7 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
                     Icon(Icons.info, color: Colors.blue[700]),
                     SizedBox(width: 8),
                     Text(
-                      'Инструкция',
+                      'Инструкция по практике',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -234,17 +181,22 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  '• Выберите жест для практики\n• Камера будет распознавать ваши движения\n• Следуйте описанию и инструкциям\n• Практикуйтесь до правильного выполнения',
+                  '• Выберите жест для практики из списка ниже\n'
+                      '• У вас будет 30 секунд для тренировки\n'
+                      '• Следуйте пошаговым инструкциям\n'
+                      '• Камера будет распознавать ваши движения\n'
+                      '• Выполните жест правильно 3 раза подряд для завершения',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.blue[600],
+                    height: 1.4,
                   ),
                 ),
               ],
             ),
           ),
 
-          // Поиск
+          // Поисковая строка
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: TextField(
@@ -256,6 +208,16 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
               decoration: InputDecoration(
                 hintText: 'Поиск жестов...',
                 prefixIcon: Icon(Icons.search),
+                suffixIcon: searchQuery.isNotEmpty
+                    ? IconButton(
+                  icon: Icon(Icons.clear),
+                  onPressed: () {
+                    setState(() {
+                      searchQuery = '';
+                    });
+                  },
+                )
+                    : null,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -263,9 +225,10 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
               ),
             ),
           ),
-          SizedBox(height: 8),
 
-          // Фильтр по категориям
+          SizedBox(height: 16),
+
+          // Фильтры по категориям
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: EdgeInsets.symmetric(horizontal: 16),
@@ -277,10 +240,9 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
                   child: FilterChip(
                     selected: isSelected,
                     label: Text(
-                      categoryLabels[category] ?? category,
+                      _getCategoryDisplayName(category),
                       style: TextStyle(
                         color: isSelected ? Colors.white : Colors.black,
-                        fontSize: 12,
                       ),
                     ),
                     backgroundColor: Colors.grey[200],
@@ -295,7 +257,8 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
               }).toList(),
             ),
           ),
-          SizedBox(height: 8),
+
+          SizedBox(height: 16),
 
           // Список жестов
           Expanded(
@@ -305,46 +268,42 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.gesture,
+                    Icons.gesture_outlined,
                     size: 64,
                     color: Colors.grey[400],
                   ),
                   SizedBox(height: 16),
                   Text(
-                    searchQuery.isNotEmpty || selectedCategory != 'all'
-                        ? 'Нет жестов по вашему запросу'
-                        : 'Жесты не найдены',
+                    searchQuery.isNotEmpty
+                        ? 'Жесты не найдены'
+                        : 'Нет жестов в данной категории',
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.grey[600],
                     ),
                   ),
-                  if (searchQuery.isNotEmpty || selectedCategory != 'all') ...[
-                    SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          searchQuery = '';
-                          selectedCategory = 'all';
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
-                        foregroundColor: Colors.white,
+                  if (searchQuery.isNotEmpty) ...[
+                    SizedBox(height: 8),
+                    Text(
+                      'Попробуйте изменить поисковый запрос',
+                      style: TextStyle(
+                        color: Colors.grey[500],
                       ),
-                      child: Text('Сбросить фильтры'),
                     ),
                   ],
                 ],
               ),
             )
-                : ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              itemCount: filteredGestures.length,
-              itemBuilder: (context, index) {
-                final gesture = filteredGestures[index];
-                return _buildGestureCard(gesture);
-              },
+                : RefreshIndicator(
+              onRefresh: _loadGestures,
+              child: ListView.builder(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                itemCount: filteredGestures.length,
+                itemBuilder: (context, index) {
+                  final gesture = filteredGestures[index];
+                  return _buildGestureCard(gesture);
+                },
+              ),
             ),
           ),
         ],
@@ -355,7 +314,7 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
   Widget _buildGestureCard(Gesture gesture) {
     return Card(
       margin: EdgeInsets.only(bottom: 12),
-      elevation: 3,
+      elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -364,9 +323,7 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => GesturePracticeScreen(
-                gesture: gesture,
-              ),
+              builder: (context) => GesturePracticeScreen(gesture: gesture),
             ),
           );
         },
@@ -375,39 +332,36 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
           padding: const EdgeInsets.all(16.0),
           child: Row(
             children: [
-              // Иконка/изображение жеста
+              // Иконка жеста
               Container(
-                width: 70,
-                height: 70,
+                width: 60,
+                height: 60,
                 decoration: BoxDecoration(
                   color: Colors.deepPurple[100],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: Colors.deepPurple[200]!,
-                    width: 1,
-                  ),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                child: gesture.imagePath.isNotEmpty
-                    ? ClipRRect(
-                  borderRadius: BorderRadius.circular(11),
-                  child: Image.asset(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: gesture.imagePath.isNotEmpty
+                      ? Image.asset(
                     gesture.imagePath,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Icon(
                         Icons.gesture,
-                        size: 35,
+                        size: 30,
                         color: Colors.deepPurple[700],
                       );
                     },
+                  )
+                      : Icon(
+                    Icons.gesture,
+                    size: 30,
+                    color: Colors.deepPurple[700],
                   ),
-                )
-                    : Icon(
-                  Icons.gesture,
-                  size: 35,
-                  color: Colors.deepPurple[700],
                 ),
               ),
+
               SizedBox(width: 16),
 
               // Информация о жесте
@@ -415,36 +369,41 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      gesture.name,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                    SizedBox(height: 4),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        categoryLabels[gesture.category] ?? gesture.category,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            gesture.name,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[800],
+                            ),
+                          ),
                         ),
-                      ),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[200],
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            _getCategoryDisplayName(gesture.category),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 8),
                     Text(
-                      gesture.description.length > 80
-                          ? '${gesture.description.substring(0, 80)}...'
+                      gesture.description.length > 60
+                          ? '${gesture.description.substring(0, 60)}...'
                           : gesture.description,
                       style: TextStyle(
                         color: Colors.grey[600],
@@ -458,22 +417,15 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
 
               // Кнопка практики
               Container(
-                padding: EdgeInsets.all(12),
+                padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: Colors.deepPurple,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.deepPurple.withOpacity(0.3),
-                      blurRadius: 4,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   Icons.play_arrow,
                   color: Colors.white,
-                  size: 28,
+                  size: 24,
                 ),
               ),
             ],
@@ -481,11 +433,5 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _adminService.dispose();
-    super.dispose();
   }
 }

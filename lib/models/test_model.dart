@@ -2,7 +2,6 @@
 class Test {
   final String id;
   final String question;
-  final String imagePath;
   final List<String> options;
   final int correctOptionIndex;
   final String category;
@@ -10,7 +9,6 @@ class Test {
   Test({
     required this.id,
     required this.question,
-    this.imagePath = '', // Значение по умолчанию
     required this.options,
     required this.correctOptionIndex,
     this.category = 'basic',
@@ -18,13 +16,10 @@ class Test {
 
   factory Test.fromJson(Map<String, dynamic> json) {
     return Test(
-      id: json['id'] ?? '',
-      question: json['question'] ?? '',
-      imagePath: json['imagePath'] ?? '',
-      options: json['options'] != null
-          ? List<String>.from(json['options'])
-          : [],
-      correctOptionIndex: json['correctOptionIndex'] ?? 0,
+      id: json['id'],
+      question: json['question'],
+      options: List<String>.from(json['options']),
+      correctOptionIndex: json['correctOptionIndex'],
       category: json['category'] ?? 'basic',
     );
   }
@@ -33,18 +28,16 @@ class Test {
     return {
       'id': id,
       'question': question,
-      'imagePath': imagePath,
       'options': options,
       'correctOptionIndex': correctOptionIndex,
       'category': category,
     };
   }
 
-  // Метод для создания копии с изменениями
+  // Метод для создания копии с измененными параметрами
   Test copyWith({
     String? id,
     String? question,
-    String? imagePath,
     List<String>? options,
     int? correctOptionIndex,
     String? category,
@@ -52,25 +45,31 @@ class Test {
     return Test(
       id: id ?? this.id,
       question: question ?? this.question,
-      imagePath: imagePath ?? this.imagePath,
-      options: options ?? this.options,
+      options: options ?? List<String>.from(this.options),
       correctOptionIndex: correctOptionIndex ?? this.correctOptionIndex,
       category: category ?? this.category,
     );
   }
 
-  @override
-  String toString() {
-    return 'Test{id: $id, question: $question, category: $category}';
+  // Проверка правильности ответа
+  bool isCorrectAnswer(int selectedIndex) {
+    return selectedIndex == correctOptionIndex;
   }
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is Test &&
-              runtimeType == other.runtimeType &&
-              id == other.id;
+  // Получение правильного ответа
+  String get correctAnswer {
+    if (correctOptionIndex >= 0 && correctOptionIndex < options.length) {
+      return options[correctOptionIndex];
+    }
+    return '';
+  }
 
-  @override
-  int get hashCode => id.hashCode;
+  // Валидация теста
+  bool get isValid {
+    return question.isNotEmpty &&
+        options.length >= 2 &&
+        correctOptionIndex >= 0 &&
+        correctOptionIndex < options.length &&
+        options.every((option) => option.isNotEmpty);
+  }
 }

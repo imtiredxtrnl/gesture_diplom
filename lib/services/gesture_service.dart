@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/gesture.dart';
 
 class GestureService {
@@ -9,12 +10,181 @@ class GestureService {
   WebSocketChannel? _channel;
   final _serverUrl = 'ws://10.0.2.2:8765';
 
-  // Обработчики сообщений
+  // Список всех доступных жестов с реальными путями к изображениям
+  static final List<Gesture> _allGestures = [
+    Gesture(
+      id: '1',
+      name: 'Привет',
+      description: 'Жест приветствия. Поднимите руку с раскрытой ладонью и помашите ей.',
+      imagePath: 'lib/assets/gestures/hello.png',
+      category: 'greetings',
+    ),
+    Gesture(
+      id: '2',
+      name: 'Спасибо',
+      description: 'Жест благодарности. Прикоснитесь пальцами к губам, затем опустите руку вперед.',
+      imagePath: 'lib/assets/gestures/thank_you.png',
+      category: 'basic',
+    ),
+    Gesture(
+      id: '3',
+      name: 'Пожалуйста',
+      description: 'Жест вежливой просьбы. Положите открытую ладонь на грудь и сделайте круговое движение.',
+      imagePath: 'lib/assets/gestures/please.png',
+      category: 'basic',
+    ),
+    Gesture(
+      id: '4',
+      name: 'Да',
+      description: 'Жест согласия. Покажите большой палец вверх или кивните головой.',
+      imagePath: 'lib/assets/gestures/yes.png',
+      category: 'basic',
+    ),
+    Gesture(
+      id: '5',
+      name: 'Нет',
+      description: 'Жест отрицания. Покачайте головой или покажите указательным пальцем из стороны в сторону.',
+      imagePath: 'lib/assets/gestures/no.png',
+      category: 'basic',
+    ),
+    Gesture(
+      id: '6',
+      name: 'Хорошо',
+      description: 'Жест одобрения. Сформируйте кольцо из большого и указательного пальца.',
+      imagePath: 'lib/assets/gestures/ok.png',
+      category: 'emotions',
+    ),
+    Gesture(
+      id: '7',
+      name: 'Плохо',
+      description: 'Жест неодобрения. Покажите большой палец вниз.',
+      imagePath: 'lib/assets/gestures/bad.png',
+      category: 'emotions',
+    ),
+    Gesture(
+      id: '8',
+      name: 'Стоп',
+      description: 'Жест остановки. Поднимите руку с открытой ладонью перед собой.',
+      imagePath: 'lib/assets/gestures/stop.png',
+      category: 'actions',
+    ),
+    Gesture(
+      id: '9',
+      name: 'Помощь',
+      description: 'Жест просьбы о помощи. Поднимите обе руки вверх.',
+      imagePath: 'lib/assets/gestures/help.png',
+      category: 'actions',
+    ),
+    Gesture(
+      id: '10',
+      name: 'Любовь',
+      description: 'Жест выражения любви. Сложите руки в форме сердца.',
+      imagePath: 'lib/assets/gestures/love.png',
+      category: 'emotions',
+    ),
+  ];
+
+  // Обработчики сообщений для WebSocket
   Function(String)? onError;
   Function(String, double)? onGestureRecognized;
   Function(String)? onStatusMessage;
 
   GestureService._internal();
+
+  // Получение всех жестов
+  List<Gesture> getAllGestures() {
+    return List.from(_allGestures);
+  }
+
+  // Получение жеста по ID
+  Gesture? getGestureById(String id) {
+    try {
+      return _allGestures.firstWhere((gesture) => gesture.id == id);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Получение жестов по категории
+  List<Gesture> getGesturesByCategory(String category) {
+    if (category == 'all') {
+      return getAllGestures();
+    }
+    return _allGestures.where((gesture) => gesture.category == category).toList();
+  }
+
+  // Поиск жестов
+  List<Gesture> searchGestures(String query) {
+    if (query.isEmpty) {
+      return getAllGestures();
+    }
+
+    final lowerQuery = query.toLowerCase();
+    return _allGestures.where((gesture) =>
+    gesture.name.toLowerCase().contains(lowerQuery) ||
+        gesture.description.toLowerCase().contains(lowerQuery) ||
+        gesture.category.toLowerCase().contains(lowerQuery)
+    ).toList();
+  }
+
+  // Получение изученных жестов из локального хранилища
+  Future<List<String>> getLearnedGestureIds() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getStringList('learned_gestures') ?? [];
+    } catch (e) {
+      print('Error loading learned gestures: $e');
+      return [];
+    }
+  }
+
+  // Отметка жеста как изученного
+  Future<bool> markGestureAsLearned(String gestureId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final learnedGestures = await getLearnedGestureIds();
+
+      if (!learnedGestures.contains(gestureId)) {
+        learnedGestures.add(gestureId);
+        await prefs.setStringList('learned_gestures', learnedGestures);
+      }
+
+      return true;
+    } catch (e) {
+      print('Error marking gesture as learned: $e');
+      return false;
+    }
+  }
+
+  // Сброс прогресса изучения
+  Future<bool> resetLearningProgress() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('learned_gestures');
+      return true;
+    } catch (e) {
+      print('Error resetting learning progress: $e');
+      return false;
+    }
+  }
+
+  // Получение статистики изучения
+  Future<Map<String, int>> getLearningStatistics() async {
+    try {
+      final learnedGestures = await getLearnedGestureIds();
+      final totalGestures = _allGestures.length;
+      final learnedCount = learnedGestures.length;
+
+      return {
+        'total': totalGestures,
+        'learned': learnedCount,
+        'remaining': totalGestures - learnedCount,
+      };
+    } catch (e) {
+      print('Error getting learning statistics: $e');
+      return {'total': 0, 'learned': 0, 'remaining': 0};
+    }
+  }
 
   // Инициализация соединения с сервером
   Future<void> initialize() async {
@@ -126,67 +296,6 @@ class GestureService {
       if (onError != null) {
         onError!('Ошибка отправки изображения: $e');
       }
-    }
-  }
-
-  // Получение списка всех жестов
-  Future<List<Gesture>> getAllGestures() async {
-    if (_channel == null) {
-      throw Exception('Нет соединения с сервером');
-    }
-
-    final completer = Completer<List<Gesture>>();
-
-    try {
-      // Подписываемся на одноразовое получение списка жестов
-      final subscription = _channel!.stream.listen(
-            (message) {
-          try {
-            final data = json.decode(message);
-
-            if (data.containsKey('type') && data['type'] == 'dictionary_response' &&
-                data.containsKey('gestures')) {
-              final gestures = (data['gestures'] as List)
-                  .map((json) => Gesture.fromJson(json))
-                  .toList();
-
-              completer.complete(gestures);
-              subscription.cancel();
-            }
-          } catch (e) {
-            if (!completer.isCompleted) {
-              completer.completeError('Ошибка обработки ответа: $e');
-            }
-            subscription.cancel();
-          }
-        },
-        onError: (error) {
-          if (!completer.isCompleted) {
-            completer.completeError('Ошибка WebSocket: $error');
-          }
-          subscription.cancel();
-        },
-      );
-
-      // Отправляем запрос на получение всех жестов
-      final request = json.encode({
-        'type': 'dictionary',
-        'action': 'get_all',
-      });
-
-      _channel!.sink.add(request);
-
-      // Устанавливаем таймаут
-      Future.delayed(Duration(seconds: 5), () {
-        if (!completer.isCompleted) {
-          completer.completeError('Превышено время ожидания');
-          subscription.cancel();
-        }
-      });
-
-      return completer.future;
-    } catch (e) {
-      throw Exception('Ошибка получения жестов: $e');
     }
   }
 
