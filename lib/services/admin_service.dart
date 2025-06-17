@@ -95,8 +95,7 @@ class AdminService {
 
   Future<List<Gesture>> getAllGestures() async {
     final request = {
-      'type': 'gesture',
-      'action': 'get_all',
+      'type': 'gestures',
     };
 
     try {

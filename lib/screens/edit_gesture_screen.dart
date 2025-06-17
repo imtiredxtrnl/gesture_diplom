@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../models/gesture.dart';
-import '../services/gesture_data_service.dart';
+import '../services/admin_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EditGestureScreen extends StatefulWidget {
   final Gesture gesture;
@@ -18,7 +19,7 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final GestureDataService _gestureService = GestureDataService();
+  final AdminService _adminService = AdminService();
 
   String _selectedCategory = 'basic';
   File? _imageFile;
@@ -70,21 +71,21 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
   String _getCategoryDisplayName(String category) {
     switch (category) {
       case 'basic':
-        return 'Основные';
+        return category;
       case 'greetings':
-        return 'Приветствия';
+        return category;
       case 'questions':
-        return 'Вопросы';
+        return category;
       case 'emotions':
-        return 'Эмоции';
+        return category;
       case 'actions':
-        return 'Действия';
+        return category;
       case 'family':
-        return 'Семья';
+        return category;
       case 'food':
-        return 'Еда';
+        return category;
       case 'numbers':
-        return 'Числа';
+        return category;
       default:
         return category;
     }
@@ -109,7 +110,7 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Ошибка при выборе изображения: $e'),
+          content: Text(AppLocalizations.of(context)!.error_image_picker + ': $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -126,35 +127,33 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
     });
 
     try {
-      // Создаем обновленный жест
-      final updatedGesture = widget.gesture.copyWith(
+      final response = await _adminService.updateGesture(
+        id: widget.gesture.id,
         name: _nameController.text.trim(),
         description: _descriptionController.text.trim(),
         category: _selectedCategory,
-        // В реальном приложении здесь была бы загрузка изображения
         imagePath: _imageFile != null
             ? 'lib/assets/gestures/${_nameController.text.toLowerCase().replaceAll(' ', '_')}.png'
             : widget.gesture.imagePath,
       );
-
-      // Сохраняем изменения
-      await _gestureService.updateGesture(updatedGesture);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Жест успешно обновлен!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-        Navigator.pop(context, true);
+      if (response['status'] == 'success') {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.success_gesture_update),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context, true);
+        }
+      } else {
+        throw Exception(response['message'] ?? AppLocalizations.of(context)!.error_gesture_update);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Ошибка при сохранении жеста: $e'),
+            content: Text(AppLocalizations.of(context)!.error_gesture_save + ': $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -174,17 +173,17 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
     final shouldDiscard = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Несохраненные изменения'),
-        content: Text('У вас есть несохраненные изменения. Вы уверены, что хотите выйти без сохранения?'),
+        title: Text(AppLocalizations.of(context)!.unsaved_changes),
+        content: Text(AppLocalizations.of(context)!.unsaved_changes_confirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text('ОСТАТЬСЯ'),
+            child: Text(AppLocalizations.of(context)!.stay),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text('ВЫЙТИ БЕЗ СОХРАНЕНИЯ'),
+            child: Text(AppLocalizations.of(context)!.exit_without_saving),
           ),
         ],
       ),
@@ -199,13 +198,13 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Редактировать жест'),
+          title: Text(AppLocalizations.of(context)!.edit_gesture),
           actions: [
             if (_hasChanges)
               IconButton(
                 icon: Icon(Icons.save),
                 onPressed: _isLoading ? null : _saveGesture,
-                tooltip: 'Сохранить',
+                tooltip: AppLocalizations.of(context)!.save,
               ),
           ],
         ),
@@ -216,7 +215,7 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
             children: [
               CircularProgressIndicator(color: Colors.deepPurple),
               SizedBox(height: 16),
-              Text('Сохранение изменений...'),
+              Text(AppLocalizations.of(context)!.saving_changes),
             ],
           ),
         )
@@ -240,7 +239,7 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Редактирование жеста',
+                                AppLocalizations.of(context)!.edit_gesture_info,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
@@ -248,7 +247,7 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
                               ),
                               SizedBox(height: 4),
                               Text(
-                                'ID: ${widget.gesture.id}',
+                                AppLocalizations.of(context)!.gesture_id + ': ${widget.gesture.id}',
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 14,
@@ -266,7 +265,7 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
 
                 // Данные жеста
                 Text(
-                  'Данные жеста',
+                  AppLocalizations.of(context)!.gesture_data,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -278,7 +277,7 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
                 TextFormField(
                   controller: _nameController,
                   decoration: InputDecoration(
-                    labelText: 'Название жеста *',
+                    labelText: AppLocalizations.of(context)!.gesture_name + ' *',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -286,10 +285,10 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Пожалуйста, введите название жеста';
+                      return AppLocalizations.of(context)!.validation_gesture_name;
                     }
                     if (value.trim().length < 2) {
-                      return 'Название должно содержать минимум 2 символа';
+                      return AppLocalizations.of(context)!.validation_gesture_name_length;
                     }
                     return null;
                   },
@@ -301,7 +300,7 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
                 DropdownButtonFormField<String>(
                   value: _selectedCategory,
                   decoration: InputDecoration(
-                    labelText: 'Категория *',
+                    labelText: AppLocalizations.of(context)!.category + ' *',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -329,7 +328,7 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
                 TextFormField(
                   controller: _descriptionController,
                   decoration: InputDecoration(
-                    labelText: 'Описание жеста *',
+                    labelText: AppLocalizations.of(context)!.gesture_description + ' *',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -339,10 +338,10 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
                   maxLines: 5,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Пожалуйста, введите описание жеста';
+                      return AppLocalizations.of(context)!.validation_gesture_description;
                     }
                     if (value.trim().length < 10) {
-                      return 'Описание должно содержать минимум 10 символов';
+                      return AppLocalizations.of(context)!.validation_gesture_description_length;
                     }
                     return null;
                   },
@@ -352,7 +351,7 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
 
                 // Изображение жеста
                 Text(
-                  'Изображение жеста',
+                  AppLocalizations.of(context)!.gesture_image,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -403,8 +402,8 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
                     onPressed: _pickImage,
                     icon: Icon(Icons.image),
                     label: Text(_imageFile != null || widget.gesture.imagePath.isNotEmpty
-                        ? 'Заменить изображение'
-                        : 'Выбрать изображение'),
+                        ? AppLocalizations.of(context)!.change_image
+                        : AppLocalizations.of(context)!.select_image),
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.symmetric(vertical: 12),
                     ),
@@ -419,7 +418,7 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: _isLoading ? null : () => Navigator.pop(context),
-                        child: Text('Отмена'),
+                        child: Text(AppLocalizations.of(context)!.cancel),
                         style: OutlinedButton.styleFrom(
                           padding: EdgeInsets.symmetric(vertical: 16),
                         ),
@@ -429,7 +428,7 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: _isLoading || !_hasChanges ? null : _saveGesture,
-                        child: Text('Сохранить изменения'),
+                        child: Text(AppLocalizations.of(context)!.save_changes),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.deepPurple,
                           foregroundColor: Colors.white,
@@ -462,14 +461,14 @@ class _EditGestureScreenState extends State<EditGestureScreen> {
           ),
           SizedBox(height: 8),
           Text(
-            'Изображение не выбрано',
+            AppLocalizations.of(context)!.image_not_selected,
             style: TextStyle(
               color: Colors.grey[600],
             ),
           ),
           SizedBox(height: 4),
           Text(
-            'Нажмите кнопку ниже для выбора',
+            AppLocalizations.of(context)!.click_button_below_to_select,
             style: TextStyle(
               color: Colors.grey[500],
               fontSize: 12,

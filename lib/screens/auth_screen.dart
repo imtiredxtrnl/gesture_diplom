@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'main_screen.dart';
 import 'register_screen.dart';
 import '../services/auth_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AuthScreen extends StatefulWidget {
   @override
@@ -54,7 +55,7 @@ class _AuthScreenState extends State<AuthScreen> {
       } else {
         setState(() {
           _isLoading = false;
-          _errorMessage = result['message'] ?? result['status'] ?? 'Помилка авторизації';
+          _errorMessage = result['message'] ?? result['status'] ?? AppLocalizations.of(context)!.error;
         });
       }
     } catch (e) {
@@ -71,7 +72,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
     if (email.isEmpty || password.isEmpty) {
       setState(() {
-        _errorMessage = 'Введіть електронну пошту та пароль';
+        _errorMessage = AppLocalizations.of(context)!.enter_email_password;
       });
       return;
     }
@@ -109,13 +110,13 @@ class _AuthScreenState extends State<AuthScreen> {
                 color: Colors.deepPurple,
               ),
               SizedBox(height: 24),
-              Text('Вхід до застосунку',
+              Text(AppLocalizations.of(context)!.login,
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
               SizedBox(height: 24),
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
-                  labelText: 'Електронна пошта',
+                  labelText: AppLocalizations.of(context)!.email,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -127,7 +128,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
-                  labelText: 'Пароль',
+                  labelText: AppLocalizations.of(context)!.password,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -147,14 +148,14 @@ class _AuthScreenState extends State<AuthScreen> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: Text('Увійти', style: TextStyle(fontSize: 16)),
+                  child: Text(AppLocalizations.of(context)!.sign_in, style: TextStyle(fontSize: 16)),
                 ),
               ),
               SizedBox(height: 16),
               TextButton(
                 onPressed: _navigateToRegister,
                 child: Text(
-                  'Немає акаунту? Зареєструватися',
+                  AppLocalizations.of(context)!.no_account + ' ' + AppLocalizations.of(context)!.register,
                   style: TextStyle(
                     color: Colors.deepPurple,
                     fontSize: 16,

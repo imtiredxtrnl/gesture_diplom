@@ -88,6 +88,7 @@ def handle_auth_request(request, users):
                     "user": {
                         "username": email,
                         "password": password,
+                        "name": users[email].get("name", ""),
                         "role": users[email].get("role", "user"),
                         "profileImage": users[email].get("photo", ""),
                         "completedTests": users[email].get("completedTests", [])
@@ -165,6 +166,7 @@ def handle_user_request(request, users):
                 "user": {
                     "username": username,
                     "password": users[username]["password"],
+                    "name": users[username].get("name", ""),
                     "role": users[username].get("role", "user"),
                     "profileImage": users[username].get("photo", ""),
                     "completedTests": users[username].get("completedTests", [])
@@ -453,6 +455,7 @@ async def handle_connection(websocket):
     try:
         async for message in websocket:
             try:
+                print(f"Received raw message: {message}")  # Выводим тело запроса
                 request = json.loads(message)
                 request_type = request.get('type')
 
@@ -460,34 +463,64 @@ async def handle_connection(websocket):
 
                 if request_type == 'auth':
                     response = handle_auth_request(request, users)
+                    print(f"Sending response: {json.dumps(response, ensure_ascii=False)}")
                     await websocket.send(json.dumps(response))
 
                 elif request_type == 'user':
                     response = handle_user_request(request, users)
+                    print(f"Sending response: {json.dumps(response, ensure_ascii=False)}")
                     await websocket.send(json.dumps(response))
 
                 elif request_type == 'gesture':
                     response = handle_gesture_request(request)
+                    print(f"Sending response: {json.dumps(response, ensure_ascii=False)}")
+                    await websocket.send(json.dumps(response))
+
+                elif request_type == 'gestures':
+                    gestures = load_json_file(GESTURES_DATA_FILE)
+                    gesture_list = []
+                    for gesture in (gestures.values() if isinstance(gestures, dict) else gestures):
+                        gesture_copy = dict(gesture)
+                        image_path = gesture_copy.get('imagePath', '')
+                        try:
+                            with open(image_path, 'rb') as img_file:
+                                gesture_copy['imageBase64'] = base64.b64encode(img_file.read()).decode('utf-8')
+                        except Exception as e:
+                            gesture_copy['imageBase64'] = ''
+                        gesture_list.append(gesture_copy)
+                    response = {
+                        "status": "success",
+                        "gestures": gesture_list
+                    }
+                    print(f"Sending response: {json.dumps(response, ensure_ascii=False)[:500]} ...")
                     await websocket.send(json.dumps(response))
 
                 elif request_type == 'test':
                     response = handle_test_request(request)
+                    print(f"Sending response: {json.dumps(response, ensure_ascii=False)}")
                     await websocket.send(json.dumps(response))
 
                 elif request_type == 'alphabet':
                     response = handle_alphabet_request(request)
+                    print(f"Sending response: {json.dumps(response, ensure_ascii=False)}")
                     await websocket.send(json.dumps(response))
 
                 else:
                     print(f"Invalid request type: {request_type}")
-                    await websocket.send(json.dumps({"status": "error", "message": "Invalid request type"}))
+                    error_resp = {"status": "error", "message": "Invalid request type"}
+                    print(f"Sending response: {json.dumps(error_resp, ensure_ascii=False)}")
+                    await websocket.send(json.dumps(error_resp))
 
             except json.JSONDecodeError as e:
                 print(f"JSON decode error: {e}")
-                await websocket.send(json.dumps({"status": "error", "message": "Invalid JSON"}))
+                error_resp = {"status": "error", "message": "Invalid JSON"}
+                print(f"Sending response: {json.dumps(error_resp, ensure_ascii=False)}")
+                await websocket.send(json.dumps(error_resp))
             except Exception as e:
                 print(f"Error processing message: {e}")
-                await websocket.send(json.dumps({"status": "error", "message": "Error processing request"}))
+                error_resp = {"status": "error", "message": "Error processing request"}
+                print(f"Sending response: {json.dumps(error_resp, ensure_ascii=False)}")
+                await websocket.send(json.dumps(error_resp))
 
     except websockets.exceptions.ConnectionClosed:
         print(f"Client {websocket.remote_address} disconnected")

@@ -6,6 +6,7 @@ import 'profile_screen.dart';
 import '../services/auth_service.dart';
 import 'admin_panel_screen.dart';
 import 'auth_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 // Убедитесь, что нет импортов старых practice_screen.dart или
 
 class MainScreen extends StatefulWidget {
@@ -87,14 +88,14 @@ class _MainScreenState extends State<MainScreen> {
 
   List<String> get _titles {
     final baseTitles = [
-      'Камера',
-      'Жести',
-      'Профіль',
+      AppLocalizations.of(context)!.camera,
+      AppLocalizations.of(context)!.gestures,
+      AppLocalizations.of(context)!.profile,
     ];
 
     // Добавляем название для админ-панели, если пользователь - админ
     if (_isAdmin) {
-      return [...baseTitles, 'Адмін-панель'];
+      return [...baseTitles, AppLocalizations.of(context)!.admin_panel];
     }
 
     return baseTitles;
@@ -129,20 +130,20 @@ class _MainScreenState extends State<MainScreen> {
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.camera_alt),
-            label: 'Камера',
+            label: AppLocalizations.of(context)!.camera,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.sign_language),
-            label: 'Жести',
+            label: AppLocalizations.of(context)!.gestures,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Профіль',
+            label: AppLocalizations.of(context)!.profile,
           ),
           if (_isAdmin)
             BottomNavigationBarItem(
               icon: Icon(Icons.admin_panel_settings),
-              label: 'Адмін',
+              label: AppLocalizations.of(context)!.admin_panel,
             ),
         ],
       ),

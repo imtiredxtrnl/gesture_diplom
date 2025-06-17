@@ -4,6 +4,8 @@ import 'dart:convert';
 import '../models/test_model.dart';
 import '../services/auth_service.dart';
 import 'test_detail_screen.dart';
+import '../services/admin_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TestsScreen extends StatefulWidget {
   @override
@@ -11,6 +13,7 @@ class TestsScreen extends StatefulWidget {
 }
 
 class _TestsScreenState extends State<TestsScreen> {
+  final AdminService _adminService = AdminService();
   List<Test> tests = [];
   bool isLoading = true;
   List<String> completedTests = [];
@@ -22,52 +25,14 @@ class _TestsScreenState extends State<TestsScreen> {
   }
 
   Future<void> _loadTests() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
-      // Створюємо тестові дані, оскільки у нас немає JSON файлу
-      List<Test> testData = [
-        Test(
-          id: '1',
-          question: 'Який жест означає "Привіт"?',
-          options: [
-            'Піднята рука з розкритою долонею',
-            'Стиснутий кулак',
-            'Вказівний палець спрямований вгору',
-            'Дві руки схрещені на грудях'
-          ],
-          correctOptionIndex: 0,
-          category: 'greetings',
-        ),
-        Test(
-          id: '2',
-          question: 'Який жест означає "Дякую"?',
-          options: [
-            'Стиснутий кулак',
-            'Рука прикладається до губ і потім опускається вперед',
-            'Руки схрещені над головою',
-            'Великий палець вгору'
-          ],
-          correctOptionIndex: 1,
-          category: 'basic',
-        ),
-        Test(
-          id: '3',
-          question: 'Який жест означає "Так"?',
-          options: [
-            'Похитування головою вліво-вправо',
-            'Кивання головою вгору-вниз',
-            'Підняття плечей',
-            'Вказування пальцем'
-          ],
-          correctOptionIndex: 1,
-          category: 'basic',
-        ),
-      ];
-
-      // Отримання списку пройдених тестів
+      final loadedTests = await _adminService.getAllTests();
       completedTests = AuthService.currentUser?.completedTests ?? [];
-
       setState(() {
-        tests = testData;
+        tests = loadedTests;
         isLoading = false;
       });
     } catch (e) {
@@ -82,12 +47,12 @@ class _TestsScreenState extends State<TestsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Тести'),
+        title: Text(AppLocalizations.of(context)!.tests),
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : tests.isEmpty
-          ? Center(child: Text('Тести не знайдено'))
+          ? Center(child: Text(AppLocalizations.of(context)!.no_tests))
           : ListView.builder(
         padding: EdgeInsets.all(16),
         itemCount: tests.length,
@@ -155,7 +120,7 @@ class _TestsScreenState extends State<TestsScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Категорія: ${test.category}',
+                            AppLocalizations.of(context)!.category + ': ${test.category}',
                             style: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 14,
@@ -165,7 +130,7 @@ class _TestsScreenState extends State<TestsScreen> {
                             Padding(
                               padding: const EdgeInsets.only(top: 4.0),
                               child: Text(
-                                'Пройдено',
+                                AppLocalizations.of(context)!.completed,
                                 style: TextStyle(
                                   color: Colors.green[700],
                                   fontSize: 12,

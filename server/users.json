@@ -11,6 +11,9 @@
         "name": "Admin",
         "photo": "",
         "role": "admin",
-        "completedTests": []
+        "completedTests": [
+            "test_1",
+            "8a5386a6-0d97-4372-9376-ada752e26ddd"
+        ]
     }
 }

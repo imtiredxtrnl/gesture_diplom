@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/gesture.dart';
 import '../services/gesture_service.dart';
 import 'gesture_practice_screen.dart';
+import 'dart:convert';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class GestureDetailScreen extends StatefulWidget {
   final Gesture gesture;
@@ -47,7 +49,7 @@ class _GestureDetailScreenState extends State<GestureDetailScreen> {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Жест "${widget.gesture.name}" отмечен как изученный!'),
+            content: Text(AppLocalizations.of(context)!.learned),
             backgroundColor: Colors.green,
           ),
         );
@@ -55,7 +57,7 @@ class _GestureDetailScreenState extends State<GestureDetailScreen> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Ошибка при сохранении: $e'),
+          content: Text(AppLocalizations.of(context)!.error + ': $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -72,7 +74,7 @@ class _GestureDetailScreenState extends State<GestureDetailScreen> {
             IconButton(
               icon: Icon(Icons.check),
               onPressed: _markAsLearned,
-              tooltip: 'Отметить как изученный',
+              tooltip: AppLocalizations.of(context)!.mark_as_learned,
             ),
         ],
       ),
@@ -97,37 +99,85 @@ class _GestureDetailScreenState extends State<GestureDetailScreen> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.asset(
-                  widget.gesture.imagePath,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    print('Error loading image: ${widget.gesture.imagePath}');
-                    return Container(
-                      color: Colors.grey[200],
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.gesture,
-                            size: 100,
-                            color: Colors.grey[400],
-                          ),
-                          SizedBox(height: 16),
-                          Text(
-                            'Изображение недоступно',
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 16,
+                child: (widget.gesture.imageBase64?.isNotEmpty ?? false)
+                    ? Image.memory(
+                        base64Decode(widget.gesture.imageBase64!),
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.grey[200],
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.gesture,
+                                  size: 100,
+                                  color: Colors.grey[400],
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  AppLocalizations.of(context)!.image_unavailable,
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      )
+                    : widget.gesture.imagePath.isNotEmpty
+                        ? Image.asset(
+                            widget.gesture.imagePath,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.grey[200],
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.gesture,
+                                      size: 100,
+                                      color: Colors.grey[400],
+                                    ),
+                                    SizedBox(height: 16),
+                                    Text(
+                                      AppLocalizations.of(context)!.image_unavailable,
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          )
+                        : Container(
+                            color: Colors.grey[200],
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.gesture,
+                                  size: 100,
+                                  color: Colors.grey[400],
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  AppLocalizations.of(context)!.image_unavailable,
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-
+              ), // <-- конец ClipRRect
+            ), // <-- конец Container с изображением
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -166,7 +216,7 @@ class _GestureDetailScreenState extends State<GestureDetailScreen> {
                               ),
                               SizedBox(width: 4),
                               Text(
-                                'Изучен',
+                                AppLocalizations.of(context)!.learned,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: Colors.green[700],
@@ -205,7 +255,7 @@ class _GestureDetailScreenState extends State<GestureDetailScreen> {
 
                   // Описание
                   Text(
-                    'Описание',
+                    AppLocalizations.of(context)!.description,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -226,7 +276,7 @@ class _GestureDetailScreenState extends State<GestureDetailScreen> {
 
                   // Инструкции по выполнению
                   Text(
-                    'Как выполнить',
+                    AppLocalizations.of(context)!.follow_instructions,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -265,7 +315,7 @@ class _GestureDetailScreenState extends State<GestureDetailScreen> {
                           },
                           icon: Icon(Icons.camera_alt, size: 24),
                           label: Text(
-                            'Попрактиковаться с камерой',
+                            AppLocalizations.of(context)!.practice_with_camera,
                             style: TextStyle(fontSize: 16),
                           ),
                           style: ElevatedButton.styleFrom(
@@ -289,7 +339,7 @@ class _GestureDetailScreenState extends State<GestureDetailScreen> {
                             onPressed: _markAsLearned,
                             icon: Icon(Icons.check, size: 20),
                             label: Text(
-                              'Отметить как изученный',
+                              AppLocalizations.of(context)!.mark_as_learned,
                               style: TextStyle(fontSize: 14),
                             ),
                             style: OutlinedButton.styleFrom(
@@ -308,8 +358,8 @@ class _GestureDetailScreenState extends State<GestureDetailScreen> {
             ),
           ],
         ),
-      ),
-    );
+      ), // <-- закрываем children: [ ... ]
+    ); // <-- закрываем Scaffold
   }
 
   Widget _buildInstructionSteps() {

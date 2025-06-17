@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../services/auth_service.dart';
 import '../models/user_model.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EditProfileScreen extends StatefulWidget {
   @override
@@ -74,17 +75,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
         if (result['status'] == 'success') {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Профіль успішно оновлено')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.success)),
           );
           Navigator.pop(context, true);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Помилка при оновлені профіля: ${result['message']}')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.error + ': ${result['message']}')),
           );
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Помилка при оновлені профіля: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.error + ': $e')),
         );
       } finally {
         if (mounted) {
@@ -100,10 +101,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Редагування профіля'),
+        title: Text(AppLocalizations.of(context)!.edit_profile),
       ),
       body: _currentUser == null
-          ? Center(child: Text('Користувач не авторизован'))
+          ? Center(child: Text(AppLocalizations.of(context)!.user_not_authorized))
           : _isLoading
           ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
@@ -145,14 +146,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: 'Ім\'я користувача',
+                  labelText: AppLocalizations.of(context)!.username,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Будь-ласка, введіть ім\'я користувача';
+                    return AppLocalizations.of(context)!.validation_username;
                   }
                   return null;
                 },
@@ -169,7 +170,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     ),
                   ),
                   child: Text(
-                    'Зберегти зміни',
+                    AppLocalizations.of(context)!.save_changes,
                     style: TextStyle(fontSize: 16),
                   ),
                 ),

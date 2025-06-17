@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/test_model.dart';
+import '../services/admin_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddTestScreen extends StatefulWidget {
   @override
@@ -12,6 +14,7 @@ class _AddTestScreenState extends State<AddTestScreen> {
   final List<TextEditingController> _optionControllers = List.generate(
       4, (_) => TextEditingController()
   );
+  final AdminService _adminService = AdminService();
 
   String _selectedCategory = 'basic';
   int _correctOptionIndex = 0;
@@ -44,18 +47,27 @@ class _AddTestScreenState extends State<AddTestScreen> {
       });
 
       try {
-        // В реальному застосунку тут був би API-запит на збереження
-        // Для прикладу просто робимо затримку
-        await Future.delayed(Duration(seconds: 1));
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Тест успішно додано!')),
+        final options = _optionControllers
+            .map((controller) => controller.text.trim())
+            .where((text) => text.isNotEmpty)
+            .toList();
+        final response = await _adminService.createTest(
+          question: _questionController.text.trim(),
+          options: options,
+          correctOptionIndex: _correctOptionIndex,
+          category: _selectedCategory,
         );
-
-        Navigator.pop(context, true);
+        if (response['status'] == 'success') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context)!.success)),
+          );
+          Navigator.pop(context, true);
+        } else {
+          throw Exception(response['message'] ?? AppLocalizations.of(context)!.error);
+        }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Помилка при збереженні тесту: $e')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.error + ': $e')),
         );
       } finally {
         if (mounted) {
@@ -71,7 +83,7 @@ class _AddTestScreenState extends State<AddTestScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Додати тест'),
+        title: Text(AppLocalizations.of(context)!.add_test),
       ),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
@@ -83,7 +95,7 @@ class _AddTestScreenState extends State<AddTestScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Основна інформація',
+                AppLocalizations.of(context)!.main_info,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -93,14 +105,14 @@ class _AddTestScreenState extends State<AddTestScreen> {
               TextFormField(
                 controller: _questionController,
                 decoration: InputDecoration(
-                  labelText: 'Питання тесту',
+                  labelText: AppLocalizations.of(context)!.test_question,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Будь ласка, введіть питання';
+                    return AppLocalizations.of(context)!.validation_test_question;
                   }
                   return null;
                 },
@@ -109,7 +121,7 @@ class _AddTestScreenState extends State<AddTestScreen> {
               DropdownButtonFormField<String>(
                 value: _selectedCategory,
                 decoration: InputDecoration(
-                  labelText: 'Категорія',
+                  labelText: AppLocalizations.of(context)!.category,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -130,7 +142,7 @@ class _AddTestScreenState extends State<AddTestScreen> {
               ),
               SizedBox(height: 24),
               Text(
-                'Варіанти відповідей',
+                AppLocalizations.of(context)!.answer_options,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -150,7 +162,7 @@ class _AddTestScreenState extends State<AddTestScreen> {
                     ),
                   ),
                   child: Text(
-                    'Зберегти тест',
+                    AppLocalizations.of(context)!.save,
                     style: TextStyle(fontSize: 16),
                   ),
                 ),
@@ -184,8 +196,8 @@ class _AddTestScreenState extends State<AddTestScreen> {
             child: TextFormField(
               controller: _optionControllers[index],
               decoration: InputDecoration(
-                labelText: 'Варіант ${index + 1}',
-                hintText: isCorrect ? 'Правильна відповідь' : 'Варіант відповіді',
+                labelText: AppLocalizations.of(context)!.option + ' ${index + 1}',
+                hintText: isCorrect ? AppLocalizations.of(context)!.correct_answer : AppLocalizations.of(context)!.option,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -199,7 +211,7 @@ class _AddTestScreenState extends State<AddTestScreen> {
               ),
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Будь ласка, введіть варіант відповіді';
+                  return AppLocalizations.of(context)!.validation_option;
                 }
                 return null;
               },

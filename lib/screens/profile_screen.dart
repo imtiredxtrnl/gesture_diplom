@@ -3,6 +3,8 @@ import '../services/auth_service.dart';
 import '../models/user_model.dart';
 import 'edit_profile_screen.dart';
 import 'auth_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sign_language_app/services/locale_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -72,45 +74,84 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
-
-    return _currentUser == null
-        ? _buildLoginPrompt(context)
-        : SingleChildScrollView(
-      padding: EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          CircleAvatar(
-            radius: 60,
-            backgroundImage: _currentUser!.profileImage != null && _currentUser!.profileImage!.isNotEmpty
-                ? NetworkImage(_currentUser!.profileImage!) as ImageProvider
-                : AssetImage('lib/assets/default_avatar.png') as ImageProvider,
-          ),
-          SizedBox(height: 16),
-          Text(
-            _currentUser!.username,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            _isAdmin ? 'Адміністратор' : 'Користувач',
-            style: TextStyle(
-              fontSize: 16,
-              color: _isAdmin ? Colors.deepPurple : Colors.grey[600],
-            ),
-          ),
-          SizedBox(height: 24),
-          _buildStatisticsSection(),
-          SizedBox(height: 24),
-          _buildButtonsSection(context),
-        ],
-      ),
+    final localeService = LocaleService();
+    return ValueListenableBuilder<Locale>(
+      valueListenable: localeService,
+      builder: (context, locale, _) {
+        return Scaffold(
+          body: _isLoading
+              ? Center(child: CircularProgressIndicator())
+              : _currentUser == null
+                  ? _buildLoginPrompt(context)
+                  : SingleChildScrollView(
+                      padding: EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          CircleAvatar(
+                            radius: 60,
+                            backgroundImage: _currentUser!.profileImage != null && _currentUser!.profileImage!.isNotEmpty
+                                ? NetworkImage(_currentUser!.profileImage!) as ImageProvider
+                                : AssetImage('lib/assets/default_avatar.png') as ImageProvider,
+                          ),
+                          SizedBox(height: 16),
+                          if ((_currentUser!.name != null && _currentUser!.name!.isNotEmpty) || (_currentUser!.username != null && _currentUser!.username.isNotEmpty))
+                            Text(
+                              (_currentUser!.name != null && _currentUser!.name!.isNotEmpty)
+                                  ? _currentUser!.name!
+                                  : _currentUser!.username,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.normal,
+                              ),
+                            ),
+                          SizedBox(height: 8),
+                          Text(
+                            _isAdmin
+                                ? AppLocalizations.of(context)!.admin
+                                : AppLocalizations.of(context)!.user,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: _isAdmin ? Colors.deepPurple : Colors.grey[600],
+                            ),
+                          ),
+                          SizedBox(height: 24),
+                          _buildStatisticsSection(context),
+                          SizedBox(height: 24),
+                          _buildButtonsSection(context),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(AppLocalizations.of(context)!.language + ':'),
+                                const SizedBox(width: 16),
+                                DropdownButton<Locale>(
+                                  value: locale,
+                                  items: [
+                                    DropdownMenuItem(
+                                      value: const Locale('uk'),
+                                      child: Text(AppLocalizations.of(context)!.ukrainian),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: const Locale('en'),
+                                      child: Text(AppLocalizations.of(context)!.english),
+                                    ),
+                                  ],
+                                  onChanged: (Locale? newLocale) {
+                                    if (newLocale != null) {
+                                      localeService.setLocale(newLocale);
+                                    }
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+        );
+      },
     );
   }
 
@@ -126,7 +167,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           SizedBox(height: 16),
           Text(
-            'Ви не авторизованіі',
+            AppLocalizations.of(context)!.not_authorized,
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -134,7 +175,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           SizedBox(height: 8),
           Text(
-            'Будь-ласка, увійдіть в аккаунт',
+            AppLocalizations.of(context)!.please_login,
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey[600],
@@ -148,14 +189,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 MaterialPageRoute(builder: (context) => AuthScreen()),
               );
             },
-            child: Text('Увійти'),
+            child: Text(AppLocalizations.of(context)!.login),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildStatisticsSection() {
+  Widget _buildStatisticsSection(BuildContext context) {
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
@@ -167,7 +208,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Статистика',
+              AppLocalizations.of(context)!.statistics,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -178,14 +219,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 _buildStatCard(
-                  'Тестів пройдено',
+                  AppLocalizations.of(context)!.tests_completed,
                   '$_completedTests',
                   Icons.assignment_turned_in,
                   Colors.green,
                 ),
                 _buildStatCard(
-                  'Рівень',
-                  _getLevel(),
+                  AppLocalizations.of(context)!.level,
+                  _getLevel(context),
                   Icons.star,
                   Colors.amber,
                 ),
@@ -201,7 +242,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       children: [
         _buildActionButton(
-          'Редагування профіля',
+          AppLocalizations.of(context)!.edit_profile,
           Icons.edit,
           Colors.blue,
               () async {
@@ -216,7 +257,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         SizedBox(height: 12),
         _buildActionButton(
-          'Скинути прогрес тестів',
+          AppLocalizations.of(context)!.reset_tests,
           Icons.refresh,
           Colors.orange,
               () {
@@ -225,7 +266,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         SizedBox(height: 12),
         _buildActionButton(
-          'Вийти з аккаунта',
+          AppLocalizations.of(context)!.logout,
           Icons.exit_to_app,
           Colors.red,
               () {
@@ -316,12 +357,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Скинути прогрес'),
-        content: Text('Ви впевнені, що хочете скинути увесь прогрес тестів? Цю дію неможна буде потім відмінити.'),
+        title: Text(AppLocalizations.of(context)!.reset_progress),
+        content: Text(AppLocalizations.of(context)!.confirm_reset_progress),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('ВІДМІНА'),
+            child: Text(AppLocalizations.of(context)!.cancel.toUpperCase()),
           ),
           TextButton(
             onPressed: () async {
@@ -330,10 +371,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               await AuthService.resetCompletedTests(_currentUser!.username);
               _loadUserData();
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Прогрес тестів скинуто')),
+                SnackBar(content: Text(AppLocalizations.of(context)!.progress_reset)),
               );
             },
-            child: Text('СКИНУТИ'),
+            child: Text(AppLocalizations.of(context)!.reset.toUpperCase()),
           ),
         ],
       ),
@@ -344,12 +385,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
         context: context,
         builder: (context) => AlertDialog(
-        title: Text('Вихід з аккаунту'),
-          content: Text('Ви впевнені, що хочете вийти з аккаунту?'),
+        title: Text(AppLocalizations.of(context)!.logout),
+          content: Text(AppLocalizations.of(context)!.confirm_logout),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('ВІДМІНА'),
+              child: Text(AppLocalizations.of(context)!.cancel.toUpperCase()),
             ),
             TextButton(
               onPressed: () async {
@@ -360,17 +401,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   MaterialPageRoute(builder: (context) => AuthScreen()),
                 );
               },
-              child: Text('ВИЙТИ'),
+              child: Text(AppLocalizations.of(context)!.logout.toUpperCase()),
             ),
           ],
         ),
     );
   }
 
-  String _getLevel() {
-    if (_completedTests >= 15) return 'Експерт';
-    if (_completedTests >= 10) return 'Досвічений';
-    if (_completedTests >= 5) return 'Середній';
-    return 'Новачок';
+  String _getLevel(BuildContext context) {
+    if (_completedTests >= 15) return AppLocalizations.of(context)!.expert;
+    if (_completedTests >= 10) return AppLocalizations.of(context)!.experienced;
+    if (_completedTests >= 5) return AppLocalizations.of(context)!.intermediate;
+    return AppLocalizations.of(context)!.beginner;
   }
 }

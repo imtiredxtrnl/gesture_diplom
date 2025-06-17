@@ -4,6 +4,7 @@ import '../screens/dictionary_screen.dart';
 import '../screens/alphabet_selection_screen.dart';
 import '../screens/tests_screen.dart';
 import '../screens/gesture_selection_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class GesturesScreen extends StatelessWidget {
   @override
@@ -14,8 +15,8 @@ class GesturesScreen extends StatelessWidget {
         children: [
           _buildCategoryCard(
             context,
-            'Словник жестів',
-            'Вивчіть основні жести та їх значення',
+            AppLocalizations.of(context)!.gestures_dictionary,
+            AppLocalizations.of(context)!.gestures_dictionary_description,
             Icons.sign_language,
             Colors.purple[700]!,
                 () => Navigator.push(
@@ -26,8 +27,8 @@ class GesturesScreen extends StatelessWidget {
           SizedBox(height: 16),
           _buildCategoryCard(
             context,
-            'Практика жестів',
-            'Практикуйте жести з використанням камери та таймеру',
+            AppLocalizations.of(context)!.gestures_practice,
+            AppLocalizations.of(context)!.gestures_practice_description,
             Icons.camera_alt,
             Colors.teal[700]!,
                 () => Navigator.push(
@@ -38,8 +39,8 @@ class GesturesScreen extends StatelessWidget {
           SizedBox(height: 16),
           _buildCategoryCard(
             context,
-            'Алфавіт',
-            'Вивчіть алфавіт на мові жестів (украинській и англійській)',
+            AppLocalizations.of(context)!.gestures_alphabet,
+            AppLocalizations.of(context)!.gestures_alphabet_description,
             Icons.text_fields,
             Colors.blue[700]!,
                 () => Navigator.push(
@@ -50,8 +51,8 @@ class GesturesScreen extends StatelessWidget {
           SizedBox(height: 16),
           _buildCategoryCard(
             context,
-            'Тести',
-            'Перевірте свої знання мови жестів',
+            AppLocalizations.of(context)!.gestures_tests,
+            AppLocalizations.of(context)!.gestures_tests_description,
             Icons.quiz,
             Colors.green[700]!,
                 () => Navigator.push(

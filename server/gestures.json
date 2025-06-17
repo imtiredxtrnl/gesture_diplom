@@ -1,1 +1,82 @@
-{}
+{
+  "1": {
+    "id": "1",
+    "name": "Привет",
+    "description": "Жест приветствия. Поднимите руку с раскрытой ладонью и помашите ей.",
+    "category": "greetings",
+    "imagePath": "data/gestures/hello.png",
+    "created_at": "2024-06-01T12:00:00"
+  },
+  "2": {
+    "id": "2",
+    "name": "Спасибо",
+    "description": "Жест благодарности. Прикоснитесь пальцами к губам, затем опустите руку вперед.",
+    "category": "basic",
+    "imagePath": "data/gestures/thank_you.png",
+    "created_at": "2024-06-01T12:01:00"
+  },
+  "3": {
+    "id": "3",
+    "name": "Пожалуйста",
+    "description": "Жест вежливой просьбы. Положите открытую ладонь на грудь и сделайте круговое движение.",
+    "category": "basic",
+    "imagePath": "data/gestures/please.png",
+    "created_at": "2024-06-01T12:02:00"
+  },
+  "4": {
+    "id": "4",
+    "name": "Да",
+    "description": "Жест согласия. Покажите большой палец вверх или кивните головой.",
+    "category": "basic",
+    "imagePath": "data/gestures/yes.png",
+    "created_at": "2024-06-01T12:03:00"
+  },
+  "5": {
+    "id": "5",
+    "name": "Нет",
+    "description": "Жест отрицания. Покачайте головой или покажите указательным пальцем из стороны в сторону.",
+    "category": "basic",
+    "imagePath": "data/gestures/no.png",
+    "created_at": "2024-06-01T12:04:00"
+  },
+  "6": {
+    "id": "6",
+    "name": "Хорошо",
+    "description": "Жест одобрения. Сформируйте кольцо из большого и указательного пальца.",
+    "category": "emotions",
+    "imagePath": "data/gestures/ok.png",
+    "created_at": "2024-06-01T12:05:00"
+  },
+  "7": {
+    "id": "7",
+    "name": "Плохо",
+    "description": "Жест неодобрения. Покажите большой палец вниз.",
+    "category": "emotions",
+    "imagePath": "data/gestures/bad.png",
+    "created_at": "2024-06-01T12:06:00"
+  },
+  "8": {
+    "id": "8",
+    "name": "Стоп",
+    "description": "Жест остановки. Поднимите руку с открытой ладонью перед собой.",
+    "category": "actions",
+    "imagePath": "data/gestures/stop.png",
+    "created_at": "2024-06-01T12:07:00"
+  },
+  "9": {
+    "id": "9",
+    "name": "Помощь",
+    "description": "Жест просьбы о помощи. Поднимите обе руки вверх.",
+    "category": "actions",
+    "imagePath": "data/gestures/help.png",
+    "created_at": "2024-06-01T12:08:00"
+  },
+  "10": {
+    "id": "10",
+    "name": "Любовь",
+    "description": "Жест выражения любви. Сложите руки в форме сердца.",
+    "category": "emotions",
+    "imagePath": "data/gestures/love.png",
+    "created_at": "2024-06-01T12:09:00"
+  }
+}

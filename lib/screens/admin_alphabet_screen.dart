@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/alphabet_letter.dart';
 import '../services/admin_service.dart';
 import 'add_letter_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AdminAlphabetScreen extends StatefulWidget {
   @override
@@ -53,7 +54,7 @@ class _AdminAlphabetScreenState extends State<AdminAlphabetScreen> with SingleTi
       });
       print('Error loading alphabet: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка загрузки алфавита: $e')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.error_loading_alphabet + ': $e')),
       );
     }
   }
@@ -70,16 +71,16 @@ class _AdminAlphabetScreenState extends State<AdminAlphabetScreen> with SingleTi
           }
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Буква "${letter.letter}" удалена')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.letter_deleted + ': "${letter.letter}"')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка удаления: ${result['message']}')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.error_deleting + ': ${result['message']}')),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка удаления буквы: $e')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.error_deleting_letter + ': $e')),
       );
     }
   }
@@ -88,7 +89,7 @@ class _AdminAlphabetScreenState extends State<AdminAlphabetScreen> with SingleTi
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Управление алфавитом'),
+        title: Text(AppLocalizations.of(context)!.alphabet_management),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
         actions: [
@@ -105,11 +106,11 @@ class _AdminAlphabetScreenState extends State<AdminAlphabetScreen> with SingleTi
           tabs: [
             Tab(
               icon: Icon(Icons.flag),
-              text: 'Украинский',
+              text: AppLocalizations.of(context)!.ukrainian,
             ),
             Tab(
               icon: Icon(Icons.flag_outlined),
-              text: 'Английский',
+              text: AppLocalizations.of(context)!.english,
             ),
           ],
         ),
@@ -140,7 +141,7 @@ class _AdminAlphabetScreenState extends State<AdminAlphabetScreen> with SingleTi
         },
         backgroundColor: Colors.deepPurple,
         child: Icon(Icons.add, color: Colors.white),
-        tooltip: 'Добавить букву',
+        tooltip: AppLocalizations.of(context)!.add_letter,
       ),
     );
   }
@@ -158,7 +159,7 @@ class _AdminAlphabetScreenState extends State<AdminAlphabetScreen> with SingleTi
             ),
             SizedBox(height: 16),
             Text(
-              'Буквы не найдены',
+              AppLocalizations.of(context)!.no_letters,
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.grey[600],
@@ -181,7 +182,7 @@ class _AdminAlphabetScreenState extends State<AdminAlphabetScreen> with SingleTi
                 backgroundColor: Colors.deepPurple,
                 foregroundColor: Colors.white,
               ),
-              child: Text('Добавить первую букву'),
+              child: Text(AppLocalizations.of(context)!.add_first_letter),
             ),
           ],
         ),
@@ -300,12 +301,12 @@ class _AdminAlphabetScreenState extends State<AdminAlphabetScreen> with SingleTi
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Удаление буквы'),
-        content: Text('Вы уверены, что хотите удалить букву "${letter.letter}"?'),
+        title: Text(AppLocalizations.of(context)!.delete_letter),
+        content: Text(AppLocalizations.of(context)!.confirm_delete_letter + ': "${letter.letter}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: Text('ОТМЕНА'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -315,7 +316,7 @@ class _AdminAlphabetScreenState extends State<AdminAlphabetScreen> with SingleTi
             style: TextButton.styleFrom(
               foregroundColor: Colors.red,
             ),
-            child: Text('УДАЛИТЬ'),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),

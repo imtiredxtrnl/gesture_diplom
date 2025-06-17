@@ -3,6 +3,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'dart:convert';
 import '../models/alphabet_letter.dart';
 import 'letter_detail_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AlphabetScreen extends StatefulWidget {
   final String language;
@@ -74,7 +75,7 @@ class _AlphabetScreenState extends State<AlphabetScreen> {
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : letters.isEmpty
-          ? Center(child: Text('Алфавіт не знайдено'))
+          ? Center(child: Text(AppLocalizations.of(context)!.no_letters))
           : GridView.builder(
         padding: EdgeInsets.all(16),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../models/gesture.dart';
-import '../services/gesture_data_service.dart';
+import '../services/admin_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddGestureScreen extends StatefulWidget {
   @override
@@ -14,7 +15,7 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
-  final GestureDataService _gestureService = GestureDataService();
+  final AdminService _adminService = AdminService();
 
   String _selectedCategory = 'basic';
   File? _imageFile;
@@ -79,7 +80,7 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Ошибка при выборе изображения: $e'),
+          content: Text(AppLocalizations.of(context)!.error_image_selection + ': $e'),
           backgroundColor: Colors.red,
         ),
       );
@@ -96,35 +97,32 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
     });
 
     try {
-      // Создаем новый жест
-      final newGesture = _gestureService.createGesture(
+      final response = await _adminService.createGesture(
         name: _nameController.text.trim(),
         description: _descriptionController.text.trim(),
         category: _selectedCategory,
-        // В реальном приложении здесь была бы загрузка изображения на сервер
         imagePath: _imageFile != null
             ? 'lib/assets/gestures/${_nameController.text.toLowerCase().replaceAll(' ', '_')}.png'
             : '',
       );
-
-      // Сохраняем жест
-      await _gestureService.addGesture(newGesture);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Жест "${newGesture.name}" успешно добавлен!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-        Navigator.pop(context, true);
+      if (response['status'] == 'success') {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.success_gesture_added),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context, true);
+        }
+      } else {
+        throw Exception(response['message'] ?? AppLocalizations.of(context)!.error_gesture_addition);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Ошибка при сохранении жеста: $e'),
+            content: Text(AppLocalizations.of(context)!.error_gesture_saving + ': $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -142,7 +140,7 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Добавить жест'),
+        title: Text(AppLocalizations.of(context)!.add_gesture),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
       ),
@@ -153,7 +151,7 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
           children: [
             CircularProgressIndicator(color: Colors.deepPurple),
             SizedBox(height: 16),
-            Text('Сохранение жеста...'),
+            Text(AppLocalizations.of(context)!.saving_gesture),
           ],
         ),
       )
@@ -170,7 +168,7 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
                   Icon(Icons.add_circle_outline, color: Colors.deepPurple),
                   SizedBox(width: 8),
                   Text(
-                    'Создание нового жеста',
+                    AppLocalizations.of(context)!.create_gesture,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -183,7 +181,7 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
 
               // Данные жеста
               Text(
-                'Основная информация',
+                AppLocalizations.of(context)!.main_info,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -195,7 +193,7 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: 'Название жеста *',
+                  labelText: AppLocalizations.of(context)!.gesture_name + ' *',
                   hintText: 'Например: Привет, Спасибо...',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -204,22 +202,23 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Пожалуйста, введите название жеста';
+                    return AppLocalizations.of(context)!.validation_gesture_name;
                   }
                   if (value.trim().length < 2) {
-                    return 'Название должно содержать минимум 2 символа';
+                    return AppLocalizations.of(context)!.validation_gesture_name_length;
                   }
-
-                  // Проверяем, нет ли уже жеста с таким названием
-                  final existingGestures = _gestureService.getAllGestures();
-                  final duplicateName = existingGestures.any(
-                        (gesture) => gesture.name.toLowerCase() == value.trim().toLowerCase(),
-                  );
-                  if (duplicateName) {
-                    return 'Жест с таким названием уже существует';
-                  }
-
                   return null;
+                },
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                onChanged: (value) async {
+                  if (value.trim().isNotEmpty && value.trim().length >= 2) {
+                    final gestures = await _adminService.getAllGestures();
+                    final duplicate = gestures.any((g) => g.name.toLowerCase() == value.trim().toLowerCase());
+                    if (duplicate) {
+                      _formKey.currentState?.validate();
+                      setState(() {});
+                    }
+                  }
                 },
               ),
 
@@ -229,7 +228,7 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
               DropdownButtonFormField<String>(
                 value: _selectedCategory,
                 decoration: InputDecoration(
-                  labelText: 'Категория *',
+                  labelText: AppLocalizations.of(context)!.category + ' *',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -256,8 +255,8 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
               TextFormField(
                 controller: _descriptionController,
                 decoration: InputDecoration(
-                  labelText: 'Описание жеста *',
-                  hintText: 'Подробное описание того, как выполнять жест...',
+                  labelText: AppLocalizations.of(context)!.gesture_description + ' *',
+                  hintText: AppLocalizations.of(context)!.gesture_description_hint,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -267,10 +266,10 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
                 maxLines: 5,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Пожалуйста, введите описание жеста';
+                    return AppLocalizations.of(context)!.validation_gesture_description;
                   }
                   if (value.trim().length < 10) {
-                    return 'Описание должно содержать минимум 10 символов';
+                    return AppLocalizations.of(context)!.validation_gesture_description_length;
                   }
                   return null;
                 },
@@ -280,7 +279,7 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
 
               // Изображение жеста
               Text(
-                'Изображение жеста',
+                AppLocalizations.of(context)!.gesture_image,
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -288,7 +287,7 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
               ),
               SizedBox(height: 8),
               Text(
-                'Добавьте изображение, демонстрирующее жест (необязательно)',
+                AppLocalizations.of(context)!.gesture_image_hint,
                 style: TextStyle(
                   color: Colors.grey[600],
                   fontSize: 14,
@@ -330,7 +329,7 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
                         ),
                         SizedBox(height: 8),
                         Text(
-                          'Нажмите, чтобы выбрать изображение',
+                          AppLocalizations.of(context)!.add_image,
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 16,
@@ -350,29 +349,30 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
                 ),
               ),
 
-              if (_imageFile != null) ...[
-                SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.check_circle, color: Colors.green, size: 16),
-                    SizedBox(width: 4),
-                    Text(
-                      'Изображение выбрано',
-                      style: TextStyle(color: Colors.green, fontSize: 12),
-                    ),
-                    Spacer(),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          _imageFile = null;
-                        });
-                      },
-                      child: Text('Удалить'),
-                      style: TextButton.styleFrom(foregroundColor: Colors.red),
-                    ),
-                  ],
+              if (_imageFile != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Row(
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.green, size: 16),
+                      SizedBox(width: 4),
+                      Text(
+                        AppLocalizations.of(context)!.image_selected,
+                        style: TextStyle(color: Colors.green, fontSize: 12),
+                      ),
+                      Spacer(),
+                      TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _imageFile = null;
+                          });
+                        },
+                        style: TextButton.styleFrom(foregroundColor: Colors.red),
+                        child: Text(AppLocalizations.of(context)!.delete),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
 
               SizedBox(height: 32),
 
@@ -382,19 +382,27 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: _isLoading ? null : () => Navigator.pop(context),
-                      child: Text('Отмена'),
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
+                      child: Text(AppLocalizations.of(context)!.cancel),
                     ),
                   ),
                   SizedBox(width: 16),
                   Expanded(
                     child: ElevatedButton(
                       onPressed: _isLoading ? null : _saveGesture,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
                       child: _isLoading
                           ? SizedBox(
                         height: 20,
@@ -404,17 +412,8 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
                           color: Colors.white,
                         ),
                       )
-                          : Text('Создать жест'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                          : Text(AppLocalizations.of(context)!.create_gesture)),
                     ),
-                  ),
                 ],
               ),
 
@@ -438,7 +437,7 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Совет',
+                            AppLocalizations.of(context)!.tip,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.blue[700],
@@ -446,7 +445,7 @@ class _AddGestureScreenState extends State<AddGestureScreen> {
                           ),
                           SizedBox(height: 4),
                           Text(
-                            'Создавайте четкие и понятные описания жестов. Это поможет пользователям лучше изучать язык жестов.',
+                            AppLocalizations.of(context)!.tip_description,
                             style: TextStyle(
                               color: Colors.blue[600],
                               fontSize: 12,

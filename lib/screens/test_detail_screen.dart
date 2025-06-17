@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/test_model.dart';
 import '../services/auth_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class TestDetailScreen extends StatefulWidget {
   final Test test;
@@ -20,7 +21,7 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Тест'),
+        title: Text(AppLocalizations.of(context)!.test),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -41,7 +42,7 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
                     ),
                     SizedBox(height: 24),
                     Text(
-                      'Оберіть правильну відповідь:',
+                      AppLocalizations.of(context)!.choose_correct_answer,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -66,8 +67,8 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
                 ),
                 child: Text(
                   isCorrect
-                      ? 'Правильно! Ви успішно пройшли цей тест.'
-                      : 'Неправильно. Спробуйте ще раз.',
+                      ? AppLocalizations.of(context)!.correct
+                      : AppLocalizations.of(context)!.incorrect,
                   style: TextStyle(
                     fontSize: 16,
                     color: isCorrect ? Colors.green[800] : Colors.red[800],
@@ -90,7 +91,7 @@ class _TestDetailScreenState extends State<TestDetailScreen> {
                 ),
               ),
               child: Text(
-                isSubmitted ? 'Завершити' : 'Перевірити відповідь',
+                isSubmitted ? AppLocalizations.of(context)!.finish : AppLocalizations.of(context)!.check_answer,
                 style: TextStyle(fontSize: 16),
               ),
             ),

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'alphabet_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AlphabetSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Вибір алфавіту'),
+        title: Text(AppLocalizations.of(context)!.alphabet_selection),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -14,8 +15,8 @@ class AlphabetSelectionScreen extends StatelessWidget {
           children: [
             _buildLanguageCard(
               context,
-              'Український алфавіт',
-              'Вивчить український дактильний алфавіт',
+              AppLocalizations.of(context)!.ukrainian_alphabet,
+              AppLocalizations.of(context)!.ukrainian_alphabet_description,
               'assets/images/ukraine_flag.png',
               Colors.blue[700]!,
                   () => Navigator.push(
@@ -26,8 +27,8 @@ class AlphabetSelectionScreen extends StatelessWidget {
             SizedBox(height: 16),
             _buildLanguageCard(
               context,
-              'Англійський алфавіт',
-              'Вивчить англійський дактильний алфавіт',
+              AppLocalizations.of(context)!.english_alphabet,
+              AppLocalizations.of(context)!.english_alphabet_description,
               'assets/images/uk_flag.png',
               Colors.red[700]!,
                   () => Navigator.push(

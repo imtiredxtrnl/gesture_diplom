@@ -1,8 +1,10 @@
 // lib/screens/gesture_selection_screen.dart
 import 'package:flutter/material.dart';
 import '../models/gesture.dart';
-import '../services/gesture_data_service.dart';
+import '../services/admin_service.dart';
 import 'gesture_practice_screen.dart';
+import 'dart:convert';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class GestureSelectionScreen extends StatefulWidget {
   @override
@@ -10,7 +12,7 @@ class GestureSelectionScreen extends StatefulWidget {
 }
 
 class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
-  final GestureDataService _gestureService = GestureDataService();
+  final AdminService _adminService = AdminService();
   List<Gesture> gestures = [];
   bool isLoading = true;
   String searchQuery = '';
@@ -32,35 +34,21 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
   void initState() {
     super.initState();
     _loadGestures();
-
-    // Добавляем слушатель для обновлений
-    _gestureService.addListener(_onGesturesUpdated);
   }
 
   @override
   void dispose() {
-    // Удаляем слушатель при уничтожении виджета
-    _gestureService.removeListener(_onGesturesUpdated);
     super.dispose();
-  }
-
-  void _onGesturesUpdated() {
-    if (mounted) {
-      _loadGestures();
-    }
   }
 
   Future<void> _loadGestures() async {
     setState(() {
       isLoading = true;
     });
-
     try {
-      // Инициализируем жесты если они еще не загружены
-      await _gestureService.initializeGestures();
-
+      final loadedGestures = await _adminService.getAllGestures();
       setState(() {
-        gestures = _gestureService.getAllGestures();
+        gestures = loadedGestures;
         isLoading = false;
       });
     } catch (e) {
@@ -68,11 +56,10 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
         isLoading = false;
       });
       print('Error loading gestures: $e');
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Ошибка загрузки жестов: $e'),
+            content: Text(AppLocalizations.of(context)!.error_loading_gestures + ': $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -102,23 +89,23 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
   String _getCategoryDisplayName(String category) {
     switch (category) {
       case 'all':
-        return 'Все';
+        return category;
       case 'basic':
-        return 'Основные';
+        return category;
       case 'greetings':
-        return 'Приветствия';
+        return category;
       case 'questions':
-        return 'Вопросы';
+        return category;
       case 'emotions':
-        return 'Эмоции';
+        return category;
       case 'actions':
-        return 'Действия';
+        return category;
       case 'family':
-        return 'Семья';
+        return category;
       case 'food':
-        return 'Еда';
+        return category;
       case 'numbers':
-        return 'Числа';
+        return category;
       default:
         return category;
     }
@@ -128,14 +115,14 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Выберите жест для практики'),
+        title: Text(AppLocalizations.of(context)!.select_gesture),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: Icon(Icons.refresh),
             onPressed: _loadGestures,
-            tooltip: 'Обновить',
+            tooltip: AppLocalizations.of(context)!.refresh,
           ),
         ],
       ),
@@ -146,7 +133,7 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
           children: [
             CircularProgressIndicator(color: Colors.deepPurple),
             SizedBox(height: 16),
-            Text('Загрузка жестов...'),
+            Text(AppLocalizations.of(context)!.loading_gestures),
           ],
         ),
       )
@@ -170,7 +157,7 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
                     Icon(Icons.info, color: Colors.blue[700]),
                     SizedBox(width: 8),
                     Text(
-                      'Инструкция по практике',
+                      AppLocalizations.of(context)!.practice_instruction,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -181,11 +168,12 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
                 ),
                 SizedBox(height: 8),
                 Text(
-                  '• Выберите жест для практики из списка ниже\n'
-                      '• У вас будет 30 секунд для тренировки\n'
-                      '• Следуйте пошаговым инструкциям\n'
-                      '• Камера будет распознавать ваши движения\n'
-                      '• Выполните жест правильно 3 раза подряд для завершения',
+                  AppLocalizations.of(context)!.practice_step1 + '\n' +
+                      AppLocalizations.of(context)!.practice_step2 + '\n' +
+                      AppLocalizations.of(context)!.practice_step3 + '\n' +
+                      AppLocalizations.of(context)!.practice_step4 + '\n' +
+                      AppLocalizations.of(context)!.practice_step5 + '\n' +
+                      AppLocalizations.of(context)!.practice_hint,
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.blue[600],
@@ -206,7 +194,7 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
                 });
               },
               decoration: InputDecoration(
-                hintText: 'Поиск жестов...',
+                hintText: AppLocalizations.of(context)!.search_gestures,
                 prefixIcon: Icon(Icons.search),
                 suffixIcon: searchQuery.isNotEmpty
                     ? IconButton(
@@ -275,8 +263,8 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
                   SizedBox(height: 16),
                   Text(
                     searchQuery.isNotEmpty
-                        ? 'Жесты не найдены'
-                        : 'Нет жестов в данной категории',
+                        ? AppLocalizations.of(context)!.gestures_not_found
+                        : AppLocalizations.of(context)!.no_gestures_in_category,
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.grey[600],
@@ -285,7 +273,7 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
                   if (searchQuery.isNotEmpty) ...[
                     SizedBox(height: 8),
                     Text(
-                      'Попробуйте изменить поисковый запрос',
+                      AppLocalizations.of(context)!.try_again,
                       style: TextStyle(
                         color: Colors.grey[500],
                       ),
@@ -342,23 +330,35 @@ class _GestureSelectionScreenState extends State<GestureSelectionScreen> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: gesture.imagePath.isNotEmpty
-                      ? Image.asset(
-                    gesture.imagePath,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(
-                        Icons.gesture,
-                        size: 30,
-                        color: Colors.deepPurple[700],
-                      );
-                    },
-                  )
-                      : Icon(
-                    Icons.gesture,
-                    size: 30,
-                    color: Colors.deepPurple[700],
-                  ),
+                  child: (gesture.imageBase64?.isNotEmpty ?? false)
+                      ? Image.memory(
+                          base64Decode(gesture.imageBase64!),
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              Icons.gesture,
+                              size: 30,
+                              color: Colors.deepPurple[700],
+                            );
+                          },
+                        )
+                      : gesture.imagePath.isNotEmpty
+                          ? Image.asset(
+                              gesture.imagePath,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(
+                                  Icons.gesture,
+                                  size: 30,
+                                  color: Colors.deepPurple[700],
+                                );
+                              },
+                            )
+                          : Icon(
+                              Icons.gesture,
+                              size: 30,
+                              color: Colors.deepPurple[700],
+                            ),
                 ),
               ),
 

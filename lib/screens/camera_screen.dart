@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import '../services/camera_manager.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({Key? key}) : super(key: key);
@@ -228,7 +229,7 @@ class CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver 
                         ),
                         SizedBox(height: 16),
                         Text(
-                          'Ініціалізація камери...',
+                          AppLocalizations.of(context)!.initializing_camera,
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.grey[700],
@@ -262,7 +263,7 @@ class CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver 
                           SizedBox(height: 24),
                           ElevatedButton(
                             onPressed: _initializeCamera,
-                            child: Text('Спробувати знову'),
+                            child: Text(AppLocalizations.of(context)!.try_again),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.deepPurple,
                               foregroundColor: Colors.white,
@@ -293,7 +294,7 @@ class CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver 
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Камера не ініціалізована',
+                            AppLocalizations.of(context)!.camera_not_initialized,
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey[700],
@@ -302,7 +303,7 @@ class CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver 
                           SizedBox(height: 16),
                           ElevatedButton(
                             onPressed: _initializeCamera,
-                            child: Text('Ініціалізувати камеру'),
+                            child: Text(AppLocalizations.of(context)!.initialize_camera),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.deepPurple,
                               foregroundColor: Colors.white,
@@ -338,7 +339,7 @@ class CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver 
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Роспізнаний жест:',
+                  AppLocalizations.of(context)!.recognized_gesture,
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey[700],

@@ -1,66 +1,77 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'admin_gestures_screen.dart';
 import 'admin_tests_screen.dart';
 
 class AdminPanelScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Панель адміністратора',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+    return Scaffold(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 24),
+            _buildSectionTitle(context, 'statistics'),
+            SizedBox(height: 16),
+            _buildStatCard(
+              AppLocalizations.of(context)!.total_users,
+              '1',
+              Icons.people,
+              Colors.orange,
             ),
-          ),
-          SizedBox(height: 24),
-          _buildSectionTitle('Управління контентом'),
-          SizedBox(height: 16),
-          _buildAdminCard(
-            context,
-            'Управління жестами',
-            'Додавання, редагування та видалення жестів',
-            Icons.sign_language,
-            Colors.purple[700]!,
-                () => Navigator.push(
+            SizedBox(height: 12),
+            _buildStatCard(
+              AppLocalizations.of(context)!.gestures_in_dict,
+              '5',
+              Icons.category,
+              Colors.teal,
+            ),
+            SizedBox(height: 12),
+            _buildStatCard(
+              AppLocalizations.of(context)!.tests,
+              '5',
+              Icons.assignment,
+              Colors.indigo,
+            ),
+            SizedBox(height: 24),
+            _buildAdminCard(
               context,
-              MaterialPageRoute(builder: (context) => AdminGesturesScreen()),
+              AppLocalizations.of(context)!.tests_management,
+              AppLocalizations.of(context)!.tests_management_desc,
+              Icons.quiz,
+              Colors.green[700]!,
+                  () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AdminTestsScreen()),
+              ),
             ),
-          ),
-          SizedBox(height: 12),
-          _buildAdminCard(
-            context,
-            'Управління тестами',
-            'Створення та редагування тестів',
-            Icons.quiz,
-            Colors.green[700]!,
-                () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AdminTestsScreen()),
-            ),
-          ),
-          SizedBox(height: 24),
-          _buildSectionTitle('Статистика'),
-          SizedBox(height: 16),
-          _buildStatCard('Всього користувачів', '1', Icons.people, Colors.orange),
-          SizedBox(height: 12),
-          _buildStatCard('Жестів у словнику', '5', Icons.category, Colors.teal),
-          SizedBox(height: 12),
-          _buildStatCard('Тестів', '5', Icons.assignment, Colors.indigo),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+  Widget _buildSectionTitle(BuildContext context, String key) {
+    String localized;
+    switch (key) {
+      case 'statistics':
+        localized = AppLocalizations.of(context)!.statistics;
+        break;
+      case 'gestures_in_dict':
+        localized = AppLocalizations.of(context)!.gestures_in_dict;
+        break;
+      case 'tests':
+        localized = AppLocalizations.of(context)!.tests;
+        break;
+      default:
+        localized = key;
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Text(
-        title,
+        localized,
         style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
@@ -169,4 +180,4 @@ class AdminPanelScreen extends StatelessWidget {
       ),
     );
   }
-}
+} 

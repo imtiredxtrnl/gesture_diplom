@@ -6,21 +6,40 @@ import 'services/auth_service.dart';
 import 'services/test_data_service.dart';
 import 'services/gesture_data_service.dart';
 
-void main() {
-  runApp(SignLanguageApp());
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sign_language_app/services/locale_service.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(MyApp());
 }
 
-class SignLanguageApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Sign Language App',
-      theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: SplashScreen(),
-      debugShowCheckedModeBanner: false,
+    final localeService = LocaleService();
+    return ValueListenableBuilder<Locale>(
+      valueListenable: localeService,
+      builder: (context, locale, _) {
+        return MaterialApp(
+          title: 'Sign Language App',
+          debugShowCheckedModeBanner: false,
+          locale: locale,
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          theme: ThemeData(
+            primarySwatch: Colors.deepPurple,
+            visualDensity: VisualDensity.adaptivePlatformDensity,
+          ),
+          home: SplashScreen(),
+        );
+      },
     );
   }
 }

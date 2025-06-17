@@ -1,8 +1,10 @@
 // lib/screens/dictionary_screen.dart
 import 'package:flutter/material.dart';
 import '../models/gesture.dart';
-import '../services/gesture_data_service.dart';
+import '../services/admin_service.dart';
 import 'gesture_detail_screen.dart';
+import 'dart:convert';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DictionaryScreen extends StatefulWidget {
   @override
@@ -10,7 +12,7 @@ class DictionaryScreen extends StatefulWidget {
 }
 
 class _DictionaryScreenState extends State<DictionaryScreen> {
-  final GestureDataService _gestureService = GestureDataService();
+  final AdminService _adminService = AdminService();
   List<Gesture> gestures = [];
   bool isLoading = true;
   String searchQuery = '';
@@ -32,35 +34,21 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
   void initState() {
     super.initState();
     _loadGestures();
-
-    // Добавляем слушатель для обновлений
-    _gestureService.addListener(_onGesturesUpdated);
   }
 
   @override
   void dispose() {
-    // Удаляем слушатель при уничтожении виджета
-    _gestureService.removeListener(_onGesturesUpdated);
     super.dispose();
-  }
-
-  void _onGesturesUpdated() {
-    if (mounted) {
-      _loadGestures();
-    }
   }
 
   Future<void> _loadGestures() async {
     setState(() {
       isLoading = true;
     });
-
     try {
-      // Инициализируем жесты если они еще не загружены
-      await _gestureService.initializeGestures();
-
+      final loadedGestures = await _adminService.getAllGestures();
       setState(() {
-        gestures = _gestureService.getAllGestures();
+        gestures = loadedGestures;
         isLoading = false;
       });
     } catch (e) {
@@ -68,12 +56,10 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
         isLoading = false;
       });
       print('Error loading gestures: $e');
-
-      // Показываем сообщение об ошибке
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Ошибка загрузки жестов: $e'),
+            content: Text(AppLocalizations.of(context)!.error_loading_gestures + ': $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -103,23 +89,23 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
   String _getCategoryDisplayName(String category) {
     switch (category) {
       case 'all':
-        return 'Все';
+        return category;
       case 'basic':
-        return 'Основные';
+        return category;
       case 'greetings':
-        return 'Приветствия';
+        return category;
       case 'questions':
-        return 'Вопросы';
+        return category;
       case 'emotions':
-        return 'Эмоции';
+        return category;
       case 'actions':
-        return 'Действия';
+        return category;
       case 'family':
-        return 'Семья';
+        return category;
       case 'food':
-        return 'Еда';
+        return category;
       case 'numbers':
-        return 'Числа';
+        return category;
       default:
         return category;
     }
@@ -129,12 +115,12 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Словарь жестов'),
+        title: Text(AppLocalizations.of(context)!.dictionary),
         actions: [
           IconButton(
             icon: Icon(Icons.refresh),
             onPressed: _loadGestures,
-            tooltip: 'Обновить',
+            tooltip: AppLocalizations.of(context)!.refresh,
           ),
         ],
       ),
@@ -150,7 +136,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                 });
               },
               decoration: InputDecoration(
-                hintText: 'Поиск жестов...',
+                hintText: AppLocalizations.of(context)!.search_gestures,
                 prefixIcon: Icon(Icons.search),
                 suffixIcon: searchQuery.isNotEmpty
                     ? IconButton(
@@ -213,7 +199,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                     color: Colors.deepPurple,
                   ),
                   SizedBox(height: 16),
-                  Text('Загрузка жестов...'),
+                  Text(AppLocalizations.of(context)!.loading_gestures),
                 ],
               ),
             )
@@ -230,8 +216,8 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                   SizedBox(height: 16),
                   Text(
                     searchQuery.isNotEmpty
-                        ? 'Жесты не найдены'
-                        : 'Нет жестов в данной категории',
+                        ? AppLocalizations.of(context)!.no_gestures_found
+                        : AppLocalizations.of(context)!.no_gestures_in_category,
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.grey[600],
@@ -240,7 +226,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                   if (searchQuery.isNotEmpty) ...[
                     SizedBox(height: 8),
                     Text(
-                      'Попробуйте изменить поисковый запрос',
+                      AppLocalizations.of(context)!.try_again,
                       style: TextStyle(
                         color: Colors.grey[500],
                       ),
@@ -297,23 +283,35 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: gesture.imagePath.isNotEmpty
-                      ? Image.asset(
-                    gesture.imagePath,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(
-                        Icons.gesture,
-                        size: 30,
-                        color: Colors.grey[400],
-                      );
-                    },
-                  )
-                      : Icon(
-                    Icons.gesture,
-                    size: 30,
-                    color: Colors.grey[400],
-                  ),
+                  child: (gesture.imageBase64?.isNotEmpty ?? false)
+                      ? Image.memory(
+                          base64Decode(gesture.imageBase64!),
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              Icons.gesture,
+                              size: 30,
+                              color: Colors.grey[400],
+                            );
+                          },
+                        )
+                      : gesture.imagePath.isNotEmpty
+                          ? Image.asset(
+                              gesture.imagePath,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(
+                                  Icons.gesture,
+                                  size: 30,
+                                  color: Colors.grey[400],
+                                );
+                              },
+                            )
+                          : Icon(
+                              Icons.gesture,
+                              size: 30,
+                              color: Colors.grey[400],
+                            ),
                 ),
               ),
 

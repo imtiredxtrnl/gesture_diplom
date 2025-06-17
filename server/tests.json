@@ -8,11 +8,11 @@
             "Указательный палец вверх",
             "Две руки скрещены на груди"
         ],
-        "correctOptionIndex": 0,
+        "correctOptionIndex": 1,
         "category": "greetings",
-        "imagePath": "assets/tests/test1.png",
+        "imagePath": "",
         "created_at": "2025-05-30T21:46:31.566625",
-        "updated_at": "2025-05-31T19:35:32.047327"
+        "updated_at": "2025-06-17T22:24:51.739365"
     },
     "test_2": {
         "id": "test_2",
@@ -55,5 +55,33 @@
         "category": "emotions",
         "imagePath": "assets/tests/test4.png",
         "created_at": "2025-05-30T21:46:31.566625"
+    },
+    "8a5386a6-0d97-4372-9376-ada752e26ddd": {
+        "id": "8a5386a6-0d97-4372-9376-ada752e26ddd",
+        "question": "Who is gay?",
+        "options": [
+            "123",
+            "123",
+            "123",
+            "123"
+        ],
+        "correctOptionIndex": 0,
+        "category": "basic",
+        "imagePath": "",
+        "created_at": "2025-06-17T21:36:13.616996"
+    },
+    "d08512bc-7f05-4354-8349-0b04fdc3428c": {
+        "id": "d08512bc-7f05-4354-8349-0b04fdc3428c",
+        "question": "234",
+        "options": [
+            "123",
+            "123123",
+            "12314",
+            "124214"
+        ],
+        "correctOptionIndex": 0,
+        "category": "basic",
+        "imagePath": "",
+        "created_at": "2025-06-17T21:37:45.205254"
     }
 }

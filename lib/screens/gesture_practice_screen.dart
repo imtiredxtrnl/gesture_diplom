@@ -7,6 +7,7 @@ import '../models/gesture.dart';
 import '../services/camera_manager.dart';
 import '../services/gesture_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class GesturePracticeScreen extends StatefulWidget {
   final Gesture gesture;
@@ -427,7 +428,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: Text('Поздравляем!'),
+        title: Text(AppLocalizations.of(context)!.success),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -438,12 +439,12 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
             ),
             SizedBox(height: 16),
             Text(
-              'Вы успешно выполнили жест "${widget.gesture.name}"!',
+              AppLocalizations.of(context)!.success_message(widget.gesture.name),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 8),
             Text(
-              'Жест отмечен как изученный.',
+              AppLocalizations.of(context)!.gesture_marked_as_learned,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -459,7 +460,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
               Navigator.of(context).pop(); // Закрываем диалог
               Navigator.of(context).pop(true); // Возвращаемся на предыдущий экран с результатом
             },
-            child: Text('Вернуться к словарю'),
+            child: Text(AppLocalizations.of(context)!.return_to_dictionary),
           ),
           ElevatedButton(
             onPressed: () {
@@ -471,7 +472,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
               });
               _resumeTimers();
             },
-            child: Text('Попробовать еще раз'),
+            child: Text(AppLocalizations.of(context)!.try_again),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.deepPurple,
               foregroundColor: Colors.white,
@@ -487,7 +488,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: Text('Время вышло'),
+        title: Text(AppLocalizations.of(context)!.time_up),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -498,7 +499,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
             ),
             SizedBox(height: 16),
             Text(
-              'Вы не успели выполнить жест. Хотите попробовать еще раз?',
+              AppLocalizations.of(context)!.time_up_message,
               textAlign: TextAlign.center,
             ),
           ],
@@ -510,7 +511,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
               Navigator.of(context).pop(); // Закрываем диалог
               Navigator.of(context).pop(); // Возвращаемся на предыдущий экран
             },
-            child: Text('Вернуться к словарю'),
+            child: Text(AppLocalizations.of(context)!.return_to_dictionary),
           ),
           ElevatedButton(
             onPressed: () {
@@ -522,7 +523,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
               });
               _resumeTimers();
             },
-            child: Text('Попробовать еще раз'),
+            child: Text(AppLocalizations.of(context)!.try_again),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.deepPurple,
               foregroundColor: Colors.white,
@@ -537,21 +538,21 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
   String _translateGesture(String gesture) {
     switch (gesture) {
       case 'No Hand':
-        return 'Жест не обнаружен';
+        return AppLocalizations.of(context)!.gesture_not_detected;
       case 'Open Palm':
-        return 'Открытая ладонь';
+        return AppLocalizations.of(context)!.open_palm;
       case 'Fist':
-        return 'Кулак';
+        return AppLocalizations.of(context)!.fist;
       case 'Thumbs Up':
-        return 'Большой палец вверх';
+        return AppLocalizations.of(context)!.thumbs_up;
       case 'Victory':
-        return 'Жест победы';
+        return AppLocalizations.of(context)!.victory;
       case 'Pointing':
-        return 'Указательный жест';
+        return AppLocalizations.of(context)!.pointing;
       case 'Rock':
-        return 'Рок';
+        return AppLocalizations.of(context)!.rock;
       case 'Unknown':
-        return 'Неизвестный жест';
+        return AppLocalizations.of(context)!.unknown_gesture;
       default:
         return gesture;
     }
@@ -571,11 +572,10 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Практика: ${widget.gesture.name}'),
+          title: Text(AppLocalizations.of(context)!.gestures_practice),
           centerTitle: true,
           backgroundColor: Colors.deepPurple,
           foregroundColor: Colors.white,
-          // Добавим кнопку для возврата назад с правильным освобождением ресурсов
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
@@ -622,7 +622,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Покажите жест:',
+                          AppLocalizations.of(context)!.show_gesture,
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.grey[700],
@@ -670,7 +670,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Шаг ${_currentInstructionIndex + 1} из ${_instructions.length}:',
+                    AppLocalizations.of(context)!.step((_currentInstructionIndex + 1).toString(), _instructions.length.toString()),
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.deepPurple,
@@ -679,7 +679,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
                   ),
                   SizedBox(height: 4),
                   Text(
-                    _instructions.isNotEmpty ? _instructions[_currentInstructionIndex] : 'Следуйте инструкциям',
+                    _instructions.isNotEmpty ? _instructions[_currentInstructionIndex] : AppLocalizations.of(context)!.follow_instructions,
                     style: TextStyle(
                       fontSize: 16,
                     ),
@@ -705,7 +705,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
                           ),
                           SizedBox(height: 16),
                           Text(
-                            'Инициализация камеры...',
+                            AppLocalizations.of(context)!.initializing_camera,
                             style: TextStyle(
                               fontSize: 16,
                               color: Colors.grey[700],
@@ -739,7 +739,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
                             SizedBox(height: 24),
                             ElevatedButton(
                               onPressed: _initializeCamera,
-                              child: Text('Попробовать снова'),
+                              child: Text(AppLocalizations.of(context)!.try_again),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.deepPurple,
                                 foregroundColor: Colors.white,
@@ -770,7 +770,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              'Камера не инициализирована',
+                              AppLocalizations.of(context)!.camera_not_initialized,
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.grey[700],
@@ -779,7 +779,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
                             SizedBox(height: 16),
                             ElevatedButton(
                               onPressed: _initializeCamera,
-                              child: Text('Инициализировать камеру'),
+                              child: Text(AppLocalizations.of(context)!.initialize_camera),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.deepPurple,
                                 foregroundColor: Colors.white,
@@ -824,7 +824,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
                             ),
                             SizedBox(width: 4),
                             Text(
-                              'Правильно!',
+                              AppLocalizations.of(context)!.correct,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -855,7 +855,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Распознанный жест:',
+                          AppLocalizations.of(context)!.recognized_gesture,
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[700],

@@ -1,7 +1,8 @@
 // lib/screens/edit_test_screen.dart
 import 'package:flutter/material.dart';
 import '../models/test_model.dart';
-import '../services/test_data_service.dart';
+import '../services/admin_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class EditTestScreen extends StatefulWidget {
   final Test test;
@@ -18,7 +19,7 @@ class _EditTestScreenState extends State<EditTestScreen> {
   final List<TextEditingController> _optionControllers = List.generate(
       4, (_) => TextEditingController()
   );
-  final TestDataService _testService = TestDataService();
+  final AdminService _adminService = AdminService();
 
   String _selectedCategory = 'basic';
   int _correctOptionIndex = 0;
@@ -90,21 +91,21 @@ class _EditTestScreenState extends State<EditTestScreen> {
   String _getCategoryDisplayName(String category) {
     switch (category) {
       case 'basic':
-        return 'Основные';
+        return 'basic';
       case 'greetings':
-        return 'Приветствия';
+        return 'greetings';
       case 'questions':
-        return 'Вопросы';
+        return 'questions';
       case 'emotions':
-        return 'Эмоции';
+        return 'emotions';
       case 'actions':
-        return 'Действия';
+        return 'actions';
       case 'family':
-        return 'Семья';
+        return 'family';
       case 'food':
-        return 'Еда';
+        return 'food';
       case 'numbers':
-        return 'Числа';
+        return 'numbers';
       default:
         return category;
     }
@@ -120,46 +121,35 @@ class _EditTestScreenState extends State<EditTestScreen> {
     });
 
     try {
-      // Создаем список опций
       final options = _optionControllers
           .map((controller) => controller.text.trim())
           .where((text) => text.isNotEmpty)
           .toList();
-
-      if (options.length < 2) {
-        throw Exception('Необходимо минимум 2 варианта ответа');
-      }
-
-      if (_correctOptionIndex >= options.length) {
-        throw Exception('Неверный индекс правильного ответа');
-      }
-
-      // Создаем обновленный тест
-      final updatedTest = widget.test.copyWith(
+      final response = await _adminService.updateTest(
+        id: widget.test.id,
         question: _questionController.text.trim(),
-        category: _selectedCategory,
         options: options,
         correctOptionIndex: _correctOptionIndex,
+        category: _selectedCategory,
       );
-
-      // Сохраняем изменения
-      await _testService.updateTest(updatedTest);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Тест успешно обновлен!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-        Navigator.pop(context, true);
+      if (response['status'] == 'success') {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.success),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context, true);
+        }
+      } else {
+        throw Exception(response['message'] ?? AppLocalizations.of(context)!.error);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Ошибка при сохранении теста: $e'),
+            content: Text(AppLocalizations.of(context)!.error + ': $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -179,17 +169,17 @@ class _EditTestScreenState extends State<EditTestScreen> {
     final shouldDiscard = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Несохраненные изменения'),
-        content: Text('У вас есть несохраненные изменения. Вы уверены, что хотите выйти без сохранения?'),
+        title: Text(AppLocalizations.of(context)!.unsaved_changes),
+        content: Text(AppLocalizations.of(context)!.unsaved_changes_message),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text('ОСТАТЬСЯ'),
+            child: Text(AppLocalizations.of(context)!.stay),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text('ВЫЙТИ БЕЗ СОХРАНЕНИЯ'),
+            child: Text(AppLocalizations.of(context)!.exit_without_saving),
           ),
         ],
       ),
@@ -204,13 +194,13 @@ class _EditTestScreenState extends State<EditTestScreen> {
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('Редактировать тест'),
+          title: Text(AppLocalizations.of(context)!.edit_test),
           actions: [
             if (_hasChanges)
               IconButton(
                 icon: Icon(Icons.save),
                 onPressed: _isLoading ? null : _saveTest,
-                tooltip: 'Сохранить',
+                tooltip: AppLocalizations.of(context)!.save,
               ),
           ],
         ),
@@ -221,7 +211,7 @@ class _EditTestScreenState extends State<EditTestScreen> {
             children: [
               CircularProgressIndicator(color: Colors.deepPurple),
               SizedBox(height: 16),
-              Text('Сохранение изменений...'),
+              Text(AppLocalizations.of(context)!.saving_changes),
             ],
           ),
         )
@@ -245,7 +235,7 @@ class _EditTestScreenState extends State<EditTestScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Редактирование теста',
+                                AppLocalizations.of(context)!.editing_test,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
@@ -253,7 +243,7 @@ class _EditTestScreenState extends State<EditTestScreen> {
                               ),
                               SizedBox(height: 4),
                               Text(
-                                'ID: ${widget.test.id}',
+                                AppLocalizations.of(context)!.test_id + ': ${widget.test.id}',
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 14,
@@ -271,7 +261,7 @@ class _EditTestScreenState extends State<EditTestScreen> {
 
                 // Основная информация
                 Text(
-                  'Основная информация',
+                  AppLocalizations.of(context)!.main_info,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -283,7 +273,7 @@ class _EditTestScreenState extends State<EditTestScreen> {
                 TextFormField(
                   controller: _questionController,
                   decoration: InputDecoration(
-                    labelText: 'Вопрос теста *',
+                    labelText: AppLocalizations.of(context)!.test_question + ' *',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -292,10 +282,10 @@ class _EditTestScreenState extends State<EditTestScreen> {
                   maxLines: 3,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Пожалуйста, введите вопрос';
+                      return AppLocalizations.of(context)!.validation_test_question;
                     }
                     if (value.trim().length < 10) {
-                      return 'Вопрос должен содержать минимум 10 символов';
+                      return AppLocalizations.of(context)!.validation_test_question_length;
                     }
                     return null;
                   },
@@ -307,7 +297,7 @@ class _EditTestScreenState extends State<EditTestScreen> {
                 DropdownButtonFormField<String>(
                   value: _selectedCategory,
                   decoration: InputDecoration(
-                    labelText: 'Категория *',
+                    labelText: AppLocalizations.of(context)!.category + ' *',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -333,7 +323,7 @@ class _EditTestScreenState extends State<EditTestScreen> {
 
                 // Варианты ответов
                 Text(
-                  'Варианты ответов',
+                  AppLocalizations.of(context)!.answer_options,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -351,7 +341,7 @@ class _EditTestScreenState extends State<EditTestScreen> {
                     Expanded(
                       child: OutlinedButton(
                         onPressed: _isLoading ? null : () => Navigator.pop(context),
-                        child: Text('Отмена'),
+                        child: Text(AppLocalizations.of(context)!.cancel),
                         style: OutlinedButton.styleFrom(
                           padding: EdgeInsets.symmetric(vertical: 16),
                         ),
@@ -361,7 +351,7 @@ class _EditTestScreenState extends State<EditTestScreen> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: _isLoading || !_hasChanges ? null : _saveTest,
-                        child: Text('Сохранить изменения'),
+                        child: Text(AppLocalizations.of(context)!.save_changes),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.deepPurple,
                           foregroundColor: Colors.white,
@@ -405,8 +395,8 @@ class _EditTestScreenState extends State<EditTestScreen> {
             child: TextFormField(
               controller: _optionControllers[index],
               decoration: InputDecoration(
-                labelText: 'Вариант ${index + 1}',
-                hintText: isCorrect ? 'Правильный ответ' : 'Вариант ответа',
+                labelText: AppLocalizations.of(context)!.option + ' ${index + 1}',
+                hintText: isCorrect ? AppLocalizations.of(context)!.correct_answer : AppLocalizations.of(context)!.answer_option,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -420,7 +410,7 @@ class _EditTestScreenState extends State<EditTestScreen> {
               ),
               validator: (value) {
                 if (index < 2 && (value == null || value.isEmpty)) {
-                  return 'Первые два варианта обязательны';
+                  return AppLocalizations.of(context)!.validation_option;
                 }
                 return null;
               },

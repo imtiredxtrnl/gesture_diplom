@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../models/alphabet_letter.dart';
 import '../services/admin_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AddLetterScreen extends StatefulWidget {
   final String language;
@@ -97,9 +98,9 @@ class _AddLetterScreenState extends State<AddLetterScreen> {
       if (result['status'] == 'success') {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(widget.letter == null
-                ? 'Буква успешно добавлена!'
-                : 'Буква успешно обновлена!'),
+            content: Text(AppLocalizations.of(context)!.success + ': ' + (widget.letter == null
+                ? AppLocalizations.of(context)!.add_letter
+                : AppLocalizations.of(context)!.edit_letter)),
             backgroundColor: Colors.green,
           ),
         );
@@ -107,7 +108,7 @@ class _AddLetterScreenState extends State<AddLetterScreen> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Ошибка: ${result['message']}'),
+            content: Text(AppLocalizations.of(context)!.error + ': ' + result['message']),
             backgroundColor: Colors.red,
           ),
         );
@@ -115,7 +116,7 @@ class _AddLetterScreenState extends State<AddLetterScreen> {
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Ошибка при сохранении буквы: $e'),
+          content: Text(AppLocalizations.of(context)!.error + ': ' + e.toString()),
           backgroundColor: Colors.red,
         ),
       );
@@ -132,9 +133,7 @@ class _AddLetterScreenState extends State<AddLetterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.letter == null
-            ? 'Добавить букву ($languageName)'
-            : 'Редактировать букву ($languageName)'),
+        title: Text(AppLocalizations.of(context)!.add_letter + ' ($languageName)'),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
       ),
@@ -145,7 +144,7 @@ class _AddLetterScreenState extends State<AddLetterScreen> {
           children: [
             CircularProgressIndicator(color: Colors.deepPurple),
             SizedBox(height: 16),
-            Text('Сохранение буквы...'),
+            Text(AppLocalizations.of(context)!.saving_letter),
           ],
         ),
       )
@@ -156,15 +155,15 @@ class _AddLetterScreenState extends State<AddLetterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionTitle('Данные буквы'),
+              _buildSectionTitle(AppLocalizations.of(context)!.letter_data),
               SizedBox(height: 16),
 
               // Поле ввода буквы
               TextFormField(
                 controller: _letterController,
                 decoration: InputDecoration(
-                  labelText: 'Буква *',
-                  hintText: 'Введите букву',
+                  labelText: AppLocalizations.of(context)!.letter + ' *',
+                  hintText: AppLocalizations.of(context)!.enter_letter,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -192,21 +191,21 @@ class _AddLetterScreenState extends State<AddLetterScreen> {
                 },
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Пожалуйста, введите букву';
+                    return AppLocalizations.of(context)!.please_enter_letter;
                   }
 
                   // Проверяем для украинского алфавита
                   if (widget.language == 'uk') {
                     const ukrainianLetters = 'АБВГДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ';
                     if (!ukrainianLetters.contains(value.toUpperCase())) {
-                      return 'Введите украинскую букву';
+                      return AppLocalizations.of(context)!.enter_ukrainian_letter;
                     }
                   }
                   // Проверяем для английского алфавита
                   else if (widget.language == 'en') {
                     const englishLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
                     if (!englishLetters.contains(value.toUpperCase())) {
-                      return 'Введите английскую букву';
+                      return AppLocalizations.of(context)!.enter_english_letter;
                     }
                   }
 
@@ -215,7 +214,7 @@ class _AddLetterScreenState extends State<AddLetterScreen> {
               ),
               SizedBox(height: 24),
 
-              _buildSectionTitle('Изображение жеста для буквы'),
+              _buildSectionTitle(AppLocalizations.of(context)!.image),
               SizedBox(height: 16),
 
               // Изображение
@@ -257,7 +256,7 @@ class _AddLetterScreenState extends State<AddLetterScreen> {
               ),
               SizedBox(height: 8),
               Text(
-                'Нажмите на область выше, чтобы выбрать изображение жеста',
+                AppLocalizations.of(context)!.select_image,
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.grey[600],
@@ -280,7 +279,7 @@ class _AddLetterScreenState extends State<AddLetterScreen> {
                     ),
                   ),
                   child: Text(
-                    widget.letter == null ? 'Добавить букву' : 'Сохранить изменения',
+                    AppLocalizations.of(context)!.add_letter,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -315,7 +314,7 @@ class _AddLetterScreenState extends State<AddLetterScreen> {
           ),
           SizedBox(height: 8),
           Text(
-            'Выберите изображение жеста',
+            AppLocalizations.of(context)!.select_image_placeholder,
             style: TextStyle(
               color: Colors.grey[600],
               fontSize: 16,
@@ -323,7 +322,7 @@ class _AddLetterScreenState extends State<AddLetterScreen> {
           ),
           SizedBox(height: 4),
           Text(
-            '(необязательно для демо)',
+            AppLocalizations.of(context)!.optional_for_demo,
             style: TextStyle(
               color: Colors.grey[500],
               fontSize: 12,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/alphabet_letter.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LetterDetailScreen extends StatelessWidget {
   final AlphabetLetter letter;
@@ -10,7 +11,7 @@ class LetterDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Літера ${letter.letter}'),
+        title: Text(AppLocalizations.of(context)!.letter + ' ${letter.letter}'),
       ),
       body: Column(
         children: [
@@ -48,8 +49,8 @@ class LetterDetailScreen extends StatelessWidget {
                 SizedBox(height: 16),
                 Text(
                   letter.language == 'uk'
-                      ? 'Український дактильний алфавіт'
-                      : 'Англійський дактильний алфавіт',
+                      ? AppLocalizations.of(context)!.ukrainian_alphabet
+                      : AppLocalizations.of(context)!.english_alphabet,
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey[600],
@@ -57,7 +58,7 @@ class LetterDetailScreen extends StatelessWidget {
                 ),
                 SizedBox(height: 32),
                 Text(
-                  'У демо-версії зображення жестів для букв не завантажені',
+                  AppLocalizations.of(context)!.image_not_loaded_demo,
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey[500],

@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'dart:convert';
 import '../models/test_model.dart';
 import 'add_test_screen.dart';
+import '../services/admin_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'edit_test_screen.dart';
 
 class AdminTestsScreen extends StatefulWidget {
   @override
@@ -10,6 +13,7 @@ class AdminTestsScreen extends StatefulWidget {
 }
 
 class _AdminTestsScreenState extends State<AdminTestsScreen> {
+  final AdminService _adminService = AdminService();
   List<Test> tests = [];
   bool isLoading = true;
   String searchQuery = '';
@@ -21,49 +25,13 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
   }
 
   Future<void> _loadTests() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
-      // Створюємо тестові дані
-      List<Test> testData = [
-        Test(
-          id: '1',
-          question: 'Який жест означає "Привіт"?',
-          options: [
-            'Піднята рука з розкритою долонею',
-            'Стиснутий кулак',
-            'Вказівний палець спрямований вгору',
-            'Дві руки схрещені на грудях'
-          ],
-          correctOptionIndex: 0,
-          category: 'greetings',
-        ),
-        Test(
-          id: '2',
-          question: 'Який жест означає "Дякую"?',
-          options: [
-            'Стиснутий кулак',
-            'Рука прикладається до губ і потім опускається вперед',
-            'Руки схрещені над головою',
-            'Великий палець вгору'
-          ],
-          correctOptionIndex: 1,
-          category: 'basic',
-        ),
-        Test(
-          id: '3',
-          question: 'Який жест означає "Так"?',
-          options: [
-            'Похитування головою вліво-вправо',
-            'Кивання головою вгору-вниз',
-            'Підняття плечей',
-            'Вказування пальцем'
-          ],
-          correctOptionIndex: 1,
-          category: 'basic',
-        ),
-      ];
-
+      final loadedTests = await _adminService.getAllTests();
       setState(() {
-        tests = testData;
+        tests = loadedTests;
         isLoading = false;
       });
     } catch (e) {
@@ -88,19 +56,17 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
     final shouldDelete = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Видалення тесту'),
-        content: Text('Ви впевнені, що хочете видалити тест "${test.question}"?'),
+        title: Text(AppLocalizations.of(context)!.delete_test),
+        content: Text(AppLocalizations.of(context)!.confirm_delete_test + ' "${test.question}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text('ВІДМІНА'),
+            child: Text(AppLocalizations.of(context)!.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text('ВИДАЛИТИ'),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
-            ),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: Text(AppLocalizations.of(context)!.delete),
           ),
         ],
       ),
@@ -112,38 +78,34 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
   }
 
   Future<void> _deleteTest(Test test) async {
-    // Показуємо SnackBar з можливістю скасування
-    setState(() {
-      tests.removeWhere((t) => t.id == test.id);
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Тест "${test.question}" видалено'),
-        action: SnackBarAction(
-          label: 'ВІДМІНИТИ',
-          onPressed: () {
-            // Повертаємо тест назад у список
-            setState(() {
-              tests.add(test);
-              // Сортуємо список за ID для збереження порядку
-              tests.sort((a, b) => a.id.compareTo(b.id));
-            });
-          },
-        ),
-        duration: Duration(seconds: 5),
-      ),
-    );
-
-    // В реальному застосунку тут був би API-запит на видалення
-    // await ApiService.deleteTest(test.id);
+    try {
+      await _adminService.deleteTest(test.id);
+      _loadTests();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.success + ' "${test.question}"'),
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.error + ': $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Управління тестами'),
+        title: Text(AppLocalizations.of(context)!.tests_management),
         actions: [
           IconButton(
             icon: Icon(Icons.refresh),
@@ -162,7 +124,7 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
                 });
               },
               decoration: InputDecoration(
-                hintText: 'Пошук тестів...',
+                hintText: AppLocalizations.of(context)!.search_tests,
                 prefixIcon: Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -175,7 +137,7 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
             child: isLoading
                 ? Center(child: CircularProgressIndicator())
                 : filteredTests.isEmpty
-                ? Center(child: Text('Тести не знайдено'))
+                ? Center(child: Text(AppLocalizations.of(context)!.no_tests))
                 : ListView.builder(
               padding: EdgeInsets.all(16),
               itemCount: filteredTests.length,
@@ -198,7 +160,7 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
           }
         },
         child: Icon(Icons.add),
-        tooltip: 'Додати тест',
+        tooltip: AppLocalizations.of(context)!.add_test,
       ),
     );
   }
@@ -230,9 +192,9 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Категорія: ${test.category}'),
+            Text(AppLocalizations.of(context)!.category + ': ${test.category}'),
             SizedBox(height: 4),
-            Text('Варіанти відповідей: ${test.options.length}'),
+            Text(AppLocalizations.of(context)!.options + ': ${test.options.length}'),
           ],
         ),
         isThreeLine: true,
@@ -242,17 +204,20 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
             IconButton(
               icon: Icon(Icons.edit, color: Colors.blue),
               onPressed: () async {
-                // В реальному застосунку тут був би перехід на екран редагування
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Редагування тесту поки що не реалізовано')),
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EditTestScreen(test: test)),
                 );
+                if (result == true) {
+                  _loadTests();
+                }
               },
-              tooltip: 'Редагувати',
+              tooltip: AppLocalizations.of(context)!.edit,
             ),
             IconButton(
               icon: Icon(Icons.delete, color: Colors.red),
               onPressed: () => _showDeleteConfirmation(test),
-              tooltip: 'Видалити',
+              tooltip: AppLocalizations.of(context)!.delete,
             ),
           ],
         ),

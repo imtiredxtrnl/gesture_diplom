@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'main_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -25,14 +26,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // Валидация полей
     if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       setState(() {
-        _errorMessage = 'Усі поля обов\'язкові до заповнення';
+        _errorMessage = AppLocalizations.of(context)!.validation_all_fields_required;
       });
       return;
     }
 
     if (password != confirmPassword) {
       setState(() {
-        _errorMessage = 'Паролі не співпадають';
+        _errorMessage = AppLocalizations.of(context)!.validation_passwords_do_not_match;
       });
       return;
     }
@@ -40,7 +41,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // Установка состояния регистрации
     setState(() {
       _isRegistering = true;
-      _errorMessage = 'Реєстрація...';
+      _errorMessage = AppLocalizations.of(context)!.registration_in_progress;
     });
 
     // Формирование данных для отправки
@@ -73,14 +74,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         if (responseData['status'] == 'Success') {
           // Показываем сообщение об успешной регистрации
           ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Реєстрація успішна! Тепер Ви можете увійти.'))
+              SnackBar(content: Text(AppLocalizations.of(context)!.registration_success))
           );
 
           // Возвращаемся на экран входа
           Navigator.pop(context);
         } else {
           setState(() {
-            _errorMessage = responseData['message'] ?? 'Помилка реєстрації';
+            _errorMessage = responseData['message'] ?? AppLocalizations.of(context)!.registration_error;
           });
         }
 
@@ -90,7 +91,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         print("Register WebSocket error: $error");
         setState(() {
           _isRegistering = false;
-          _errorMessage = 'Помилка з\'єднання: $error';
+          _errorMessage = AppLocalizations.of(context)!.connection_error + ': $error';
         });
         // Закрываем канал
         registerChannel.sink.close();
@@ -98,14 +99,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
         if (_isRegistering) {
           setState(() {
             _isRegistering = false;
-            _errorMessage = 'З\'єднання закрито до отримання відповіді';
+            _errorMessage = AppLocalizations.of(context)!.connection_closed_before_response;
           });
         }
       });
     } catch (e) {
       setState(() {
         _isRegistering = false;
-        _errorMessage = 'Помилка з\'єднання із сервером: $e';
+        _errorMessage = AppLocalizations.of(context)!.connection_error_to_server + ': $e';
       });
       print("Error connecting to WebSocket server: $e");
     }
@@ -115,7 +116,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Реєстрація'),
+        title: Text(AppLocalizations.of(context)!.registration),
         backgroundColor: Colors.deepPurple,
       ),
       backgroundColor: Colors.deepPurple[50],
@@ -126,14 +127,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Створення нового акаунта',
+                AppLocalizations.of(context)!.create_account,
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 24),
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
-                  labelText: 'Email',
+                  labelText: AppLocalizations.of(context)!.email,
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.emailAddress,
@@ -142,7 +143,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               TextField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: 'Ім\'я',
+                  labelText: AppLocalizations.of(context)!.name,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -151,7 +152,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
-                  labelText: 'Пароль',
+                  labelText: AppLocalizations.of(context)!.password,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -160,7 +161,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 controller: _confirmPasswordController,
                 obscureText: true,
                 decoration: InputDecoration(
-                  labelText: 'Підтвердіть пароль',
+                  labelText: AppLocalizations.of(context)!.confirm_password,
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -180,10 +181,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         )
                     ),
                     SizedBox(width: 10),
-                    Text('Реєстрація...'),
+                    Text(AppLocalizations.of(context)!.registration_in_progress),
                   ],
                 ) :
-                Text('Зареєструватися'),
+                Text(AppLocalizations.of(context)!.register),
               ),
               if (_errorMessage.isNotEmpty) ...[
                 SizedBox(height: 12),

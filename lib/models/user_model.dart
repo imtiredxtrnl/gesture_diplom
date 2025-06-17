@@ -1,6 +1,7 @@
 class User {
   final String username;
   final String password;
+  final String? name;
   final String? profileImage;
   final String role; // 'user' или 'admin'
   final List<String> completedTests; // список ID пройденных тестов
@@ -8,6 +9,7 @@ class User {
   User({
     required this.username,
     required this.password,
+    this.name,
     this.profileImage,
     this.role = 'user',
     List<String>? completedTests,
@@ -17,6 +19,7 @@ class User {
     return User(
       username: json['username'],
       password: json['password'],
+      name: json['name'],
       profileImage: json['profileImage'],
       role: json['role'] ?? 'user',
       completedTests: json['completedTests'] != null
@@ -29,6 +32,7 @@ class User {
     return {
       'username': username,
       'password': password,
+      'name': name,
       'profileImage': profileImage,
       'role': role,
       'completedTests': completedTests,
