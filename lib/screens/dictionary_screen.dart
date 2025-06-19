@@ -5,6 +5,7 @@ import '../services/admin_service.dart';
 import 'gesture_detail_screen.dart';
 import 'dart:convert';
 import 'package:sign_language_app/l10n/app_localizations.dart';
+import 'package:sign_language_app/services/auth_service.dart';
 
 class DictionaryScreen extends StatefulWidget {
   @override
@@ -259,12 +260,15 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
 
   Widget _buildGestureCard(Gesture gesture) {
     final locale = Localizations.localeOf(context).languageCode;
+    final completedGestures = AuthService.currentUser?.completedGestures ?? [];
+    final isCompleted = completedGestures.contains(gesture.id);
     return Card(
       margin: EdgeInsets.only(bottom: 12),
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
+      color: isCompleted ? Colors.green[50] : null,
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -336,6 +340,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
+                              color: isCompleted ? Colors.green[800] : null,
                             ),
                           ),
                         ),
@@ -357,6 +362,11 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                             ),
                           ),
                         ),
+                        if (isCompleted)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 6.0),
+                            child: Icon(Icons.check_circle, color: Colors.green, size: 20),
+                          ),
                       ],
                     ),
                     SizedBox(height: 4),

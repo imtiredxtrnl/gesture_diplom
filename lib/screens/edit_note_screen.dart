@@ -17,8 +17,6 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _titleController;
   late TextEditingController _contentController;
-  late TextEditingController _translatedController;
-  late TextEditingController _translatedTitleController;
   List<String> imagePaths = [];
   List<Uint8List> imagePreviews = [];
   String selectedLanguage = 'uk';
@@ -31,8 +29,6 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
     super.initState();
     _titleController = TextEditingController(text: widget.note?['title'] ?? '');
     _contentController = TextEditingController(text: widget.note?['content'] ?? '');
-    _translatedController = TextEditingController();
-    _translatedTitleController = TextEditingController();
     imagePaths = List<String>.from(widget.note?['imagePaths'] ?? []);
     selectedLanguage = widget.note?['language'] ?? widget.language;
     targetLanguage = selectedLanguage == 'uk' ? 'en' : 'uk';
@@ -75,7 +71,6 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
         selectedLanguage,
         targetLanguage,
       );
-      _translatedController.text = translated;
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ошибка перевода: $e')));
     }
@@ -99,9 +94,9 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
       final created = allNotes.lastWhere((n) => n['title'] == _titleController.text && n['content'] == _contentController.text && n['language'] == selectedLanguage, orElse: () => null);
       if (created != null && created['groupId'] != null) {
         String otherLang = selectedLanguage == 'uk' ? 'en' : 'uk';
-        String translatedTitle = _translatedTitleController.text.isNotEmpty ? _translatedTitleController.text : _titleController.text;
-        String translatedContent = _translatedController.text.isNotEmpty ? _translatedController.text : _contentController.text;
-        if (_translatedController.text.isEmpty) {
+        String translatedTitle = _titleController.text;
+        String translatedContent = _contentController.text;
+        if (_contentController.text.isEmpty) {
           translatedContent = await NoteService.translateNoteText(_contentController.text, selectedLanguage, otherLang);
         }
         final data2 = {
@@ -144,13 +139,6 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                 decoration: InputDecoration(labelText: 'Заголовок'),
                 validator: (v) => v == null || v.isEmpty ? 'Введіть заголовок' : null,
               ),
-              if (widget.note == null) ...[
-                SizedBox(height: 8),
-                TextFormField(
-                  controller: _translatedTitleController,
-                  decoration: InputDecoration(labelText: selectedLanguage == 'uk' ? 'Заголовок (English)' : 'Заголовок (Українська)'),
-                ),
-              ],
               SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: selectedLanguage,
@@ -180,12 +168,6 @@ class _EditNoteScreenState extends State<EditNoteScreen> {
                 maxLines: 8,
                 decoration: InputDecoration(labelText: 'Текст оригіналу'),
                 validator: (v) => v == null || v.isEmpty ? 'Введіть текст' : null,
-              ),
-              SizedBox(height: 8),
-              TextFormField(
-                controller: _translatedController,
-                maxLines: 8,
-                decoration: InputDecoration(labelText: 'Переклад'),
               ),
               SizedBox(height: 16),
               Text('Зображення (PNG, drag-n-drop або вибір):'),

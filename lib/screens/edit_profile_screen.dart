@@ -29,7 +29,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     setState(() {
       _currentUser = AuthService.currentUser;
       if (_currentUser != null) {
-        _nameController.text = _currentUser!.username;
+        _nameController.text = _currentUser!.name ?? '';
       }
     });
   }
@@ -60,7 +60,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       try {
         // Подготавливаем обновленные данные пользователя
         Map<String, dynamic> updatedData = {
-          'username': _nameController.text,
+          'name': _nameController.text,
         };
 
         // Если выбрано новое фото, конвертируем его в base64
@@ -146,7 +146,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
-                  labelText: AppLocalizations.of(context)!.username,
+                  labelText: AppLocalizations.of(context)!.name,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

@@ -257,7 +257,7 @@ abstract class AppLocalizations {
   /// No description provided for @reset.
   ///
   /// In en, this message translates to:
-  /// **'Reset'**
+  /// **'Reset progress'**
   String get reset;
 
   /// No description provided for @reset_progress.

@@ -88,7 +88,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cancel => 'Cancel';
 
   @override
-  String get reset => 'Reset';
+  String get reset => 'Reset progress';
 
   @override
   String get reset_progress => 'Reset Progress';

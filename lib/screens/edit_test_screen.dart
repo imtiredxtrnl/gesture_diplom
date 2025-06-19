@@ -117,19 +117,29 @@ class _EditTestScreenState extends State<EditTestScreen> {
   }
 
   Future<void> _saveTest() async {
+    // Проверяем все поля формы
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
+    // Проверяем, что хотя бы два варианта не пустые
+    final options = _optionControllers.map((c) => c.text.trim()).where((t) => t.isNotEmpty).toList();
+    if (options.length < 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.validation_option)),
+      );
+      return;
+    }
+    // Проверяем, что правильный вариант не пустой
+    if (_correctOptionIndex >= options.length || options[_correctOptionIndex].isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.choose_correct_answer)),
+      );
+      return;
+    }
     setState(() {
       _isLoading = true;
     });
-
     try {
-      final options = _optionControllers
-          .map((controller) => controller.text.trim())
-          .where((text) => text.isNotEmpty)
-          .toList();
       final response = await _adminService.updateTest(
         id: widget.test.id,
         question: _questionController.text.trim(),
@@ -419,7 +429,6 @@ class _EditTestScreenState extends State<EditTestScreen> {
 
   Widget _buildOptionField(int index) {
     final isCorrect = _correctOptionIndex == index;
-
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Row(
@@ -440,29 +449,15 @@ class _EditTestScreenState extends State<EditTestScreen> {
             child: TextFormField(
               controller: _optionControllers[index],
               decoration: InputDecoration(
-                labelText: AppLocalizations.of(context)!.option + ' 	${index + 1}',
+                labelText: AppLocalizations.of(context)!.option + '  ${index + 1}',
                 hintText: isCorrect ? AppLocalizations.of(context)!.correct_answer : AppLocalizations.of(context)!.answer_option,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: isCorrect ? Colors.green : Colors.grey,
-                    width: isCorrect ? 2 : 1,
-                  ),
-                ),
               ),
               validator: (value) {
-                if (_optionControllers.length <= _minOptions) {
-                  if (value == null || value.isEmpty) {
-                    return AppLocalizations.of(context)!.validation_option;
-                  }
-                } else {
-                  // Если больше двух, валидируем только первые два
-                  if (index < 2 && (value == null || value.isEmpty)) {
-                    return AppLocalizations.of(context)!.validation_option;
-                  }
+                if (value == null || value.trim().isEmpty) {
+                  return AppLocalizations.of(context)!.validation_option;
                 }
                 return null;
               },

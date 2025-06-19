@@ -205,25 +205,14 @@ class AuthService {
     try {
       if (!currentUser!.completedTests.contains(testId)) {
         List<String> updatedTests = List.from(currentUser!.completedTests)..add(testId);
-
-        final request = {
-          'type': 'user',
-          'action': 'update_tests',
-          'username': currentUser!.username,
+        // Передаём все поля прогресса, чтобы не затирать остальные
+        final response = await updateUserProfile({
           'completedTests': updatedTests,
-        };
-
-        final response = await _sendRequest(request);
-
+          'completedGestures': currentUser!.completedGestures,
+          'completedNotes': currentUser!.completedNotes,
+        });
         if (response['status'] == 'success') {
-          // Обновление локального состояния
-          currentUser = User(
-            username: currentUser!.username,
-            password: currentUser!.password,
-            profileImage: currentUser!.profileImage,
-            role: currentUser!.role,
-            completedTests: updatedTests,
-          );
+          currentUser = User.fromJson(response['user']);
           return true;
         }
       }
@@ -241,28 +230,14 @@ class AuthService {
     try {
       if (!currentUser!.completedNotes.contains(noteId)) {
         List<String> updatedNotes = List.from(currentUser!.completedNotes ?? [])..add(noteId);
-
-        final request = {
-          'type': 'user',
-          'action': 'update_profile',
-          'username': currentUser!.username,
-          'data': {
-            'completedNotes': updatedNotes,
-          },
-        };
-
-        final response = await _sendRequest(request);
-
+        // Передаём все поля прогресса, чтобы не затирать остальные
+        final response = await updateUserProfile({
+          'completedTests': currentUser!.completedTests,
+          'completedGestures': currentUser!.completedGestures,
+          'completedNotes': updatedNotes,
+        });
         if (response['status'] == 'success') {
-          // Обновление локального состояния
-          currentUser = User(
-            username: currentUser!.username,
-            password: currentUser!.password,
-            profileImage: currentUser!.profileImage,
-            role: currentUser!.role,
-            completedTests: currentUser!.completedTests,
-            completedNotes: updatedNotes,
-          );
+          currentUser = User.fromJson(response['user']);
           return true;
         }
       }

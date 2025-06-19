@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/gesture.dart';
+import 'package:sign_language_app/services/auth_service.dart';
+import '../models/user_model.dart';
 
 class GestureService {
   static final GestureService _instance = GestureService._internal();
@@ -141,39 +143,21 @@ class GestureService {
   // Отметка жеста как изученного
   Future<bool> markGestureAsLearned(String gestureId) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final learnedGestures = await getLearnedGestureIds();
-
-      if (!learnedGestures.contains(gestureId)) {
-        learnedGestures.add(gestureId);
-        await prefs.setStringList('learned_gestures', learnedGestures);
-
-        // --- Синхронизация с сервером ---
-        final username = prefs.getString('username') ?? '';
-        if (username.isNotEmpty) {
-          final request = {
-            'type': 'user',
-            'action': 'update_profile',
-            'username': username,
-            'data': {
-              'completedGestures': learnedGestures,
-            },
-          };
-          try {
-            final channel = WebSocketChannel.connect(Uri.parse(_serverUrl));
-            channel.sink.add(json.encode(request));
-            // Можно дождаться ответа, если нужно
-            // await channel.stream.first;
-            await Future.delayed(Duration(milliseconds: 300));
-            await channel.sink.close();
-          } catch (e) {
-            print('Ошибка синхронизации жестов с сервером: $e');
-          }
-        }
-        // --- конец синхронизации ---
+      final user = AuthService.currentUser;
+      if (user == null) return false;
+      if (user.completedGestures.contains(gestureId)) return false;
+      final updatedGestures = List<String>.from(user.completedGestures)..add(gestureId);
+      // Передаём все поля прогресса, чтобы не затирались остальные
+      final response = await AuthService.updateUserProfile({
+        'completedTests': user.completedTests,
+        'completedGestures': updatedGestures,
+        'completedNotes': user.completedNotes,
+      });
+      if (response['status'] == 'success' && response['user'] != null) {
+        AuthService.currentUser = User.fromJson(response['user']);
+        return true;
       }
-
-      return true;
+      return false;
     } catch (e) {
       print('Error marking gesture as learned: $e');
       return false;

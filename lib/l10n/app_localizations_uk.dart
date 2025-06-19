@@ -88,7 +88,7 @@ class AppLocalizationsUk extends AppLocalizations {
   String get cancel => 'Скасувати';
 
   @override
-  String get reset => 'Скинути';
+  String get reset => 'Скинути прогрес';
 
   @override
   String get reset_progress => 'Скинути прогрес';

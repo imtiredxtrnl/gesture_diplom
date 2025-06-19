@@ -5,6 +5,7 @@ import 'edit_profile_screen.dart';
 import 'auth_screen.dart';
 import 'package:sign_language_app/l10n/app_localizations.dart';
 import 'package:sign_language_app/services/locale_service.dart';
+import 'package:sign_language_app/services/gesture_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -267,19 +268,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         SizedBox(height: 12),
         _buildActionButton(
-          AppLocalizations.of(context)!.reset_tests,
-          Icons.refresh,
-          Colors.orange,
-              () {
-            _showResetConfirmationDialog(context);
-          },
-        ),
-        SizedBox(height: 12),
-        _buildActionButton(
           AppLocalizations.of(context)!.logout,
-          Icons.exit_to_app,
+          Icons.logout,
           Colors.red,
-              () {
+          () {
             _showLogoutConfirmationDialog(context);
           },
         ),
@@ -377,8 +369,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           TextButton(
             onPressed: () async {
               Navigator.of(context).pop();
-              // Вызываем метод сброса прогресса
-              await AuthService.resetCompletedTests(_currentUser!.username);
+              final user = _currentUser!;
+              // Сброс тестов, жестов и конспектов одновременно
+              await AuthService.updateUserProfile({
+                'completedTests': [],
+                'completedNotes': [],
+                'completedGestures': [],
+              });
               _loadUserData();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(AppLocalizations.of(context)!.progress_reset)),

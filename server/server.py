@@ -200,11 +200,15 @@ def handle_user_request(request, users):
             if 'profileImage' in data:
                 users[username]['photo'] = data['profileImage']
 
-            if 'completedNotes' in data:
-                users[username]['completedNotes'] = data['completedNotes']
+            if 'name' in data:
+                users[username]['name'] = data['name']
 
-            if 'completedGestures' in data:
-                users[username]['completedGestures'] = data['completedGestures']
+            # Обновляем completedNotes, completedGestures, completedTests только если они пришли в data
+            for field in ['completedNotes', 'completedGestures', 'completedTests']:
+                if field in data:
+                    users[username][field] = data[field]
+                elif field not in users[username]:
+                    users[username][field] = []
 
             save_json_file(USER_DATA_FILE, users)
             print(f"Profile updated for {username}")

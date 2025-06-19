@@ -4,6 +4,7 @@ import '../services/gesture_service.dart';
 import 'gesture_practice_screen.dart';
 import 'dart:convert';
 import 'package:sign_language_app/l10n/app_localizations.dart';
+import 'package:sign_language_app/services/auth_service.dart';
 
 class GestureDetailScreen extends StatefulWidget {
   final Gesture gesture;
@@ -17,7 +18,7 @@ class GestureDetailScreen extends StatefulWidget {
 class _GestureDetailScreenState extends State<GestureDetailScreen> {
   final GestureService _gestureService = GestureService();
   bool isLearned = false;
-  bool isLoading = true;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -26,18 +27,10 @@ class _GestureDetailScreenState extends State<GestureDetailScreen> {
   }
 
   Future<void> _checkIfLearned() async {
-    try {
-      final learnedGestures = await _gestureService.getLearnedGestureIds();
-      setState(() {
-        isLearned = learnedGestures.contains(widget.gesture.id);
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      print('Error checking learned status: $e');
-    }
+    final user = AuthService.currentUser;
+    setState(() {
+      isLearned = user?.completedGestures.contains(widget.gesture.id) ?? false;
+    });
   }
 
   Future<void> _markAsLearned() async {

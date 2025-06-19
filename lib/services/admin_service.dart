@@ -220,7 +220,6 @@ class AdminService {
       'category': category,
       'imagePath': imagePath,
     };
-
     return await _sendRequest(request);
   }
 

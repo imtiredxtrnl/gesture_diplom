@@ -1,15 +1,16 @@
 {
     "user@example.com": {
         "password": "user123",
-        "name": "User",
+        "name": "Simple_User",
         "photo": "",
         "role": "user",
         "completedTests": [],
-        "completedNotes": []
+        "completedNotes": [],
+        "completedGestures": []
     },
     "admin@example.com": {
         "password": "admin123",
-        "name": "Admin",
+        "name": "Root",
         "photo": "",
         "role": "admin",
         "completedTests": [
@@ -20,41 +21,20 @@
             "1",
             "2",
             "5"
+        ],
+        "completedGestures": [
+            "1"
         ]
     },
     "test@gmail.com": {
         "password": "123",
-        "name": "Gluhoi Boi",
-        "photo": "",
-        "role": "user",
-        "completedTests": [],
-        "completedNotes": []
-    },
-    "123": {
-        "password": "1231",
-        "name": "123",
-        "photo": "",
-        "role": "user",
-        "completedTests": [],
-        "completedNotes": [
-            "6"
-        ]
-    },
-    "gay@tset.com": {
-        "password": "gay",
-        "name": "gay",
-        "photo": "",
-        "role": "user",
-        "completedTests": [],
-        "completedNotes": []
-    },
-    "pierr@gmail.com": {
-        "password": "123",
-        "name": "Pierre",
+        "name": "Ivan",
         "photo": "",
         "role": "user",
         "completedTests": [],
         "completedNotes": [],
-        "completedGestures": []
+        "completedGestures": [
+            "1"
+        ]
     }
 }
