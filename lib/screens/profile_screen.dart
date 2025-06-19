@@ -3,7 +3,7 @@ import '../services/auth_service.dart';
 import '../models/user_model.dart';
 import 'edit_profile_screen.dart';
 import 'auth_screen.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sign_language_app/l10n/app_localizations.dart';
 import 'package:sign_language_app/services/locale_service.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -14,6 +14,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   User? _currentUser;
   int _completedTests = 0;
+  int _completedNotes = 0;
   bool _isAdmin = false;
   bool _isLoading = true;
 
@@ -32,6 +33,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _currentUser = AuthService.currentUser;
         _completedTests = _currentUser?.completedTests.length ?? 0;
+        _completedNotes = _currentUser?.completedNotes.length ?? 0;
         _isAdmin = AuthService.isAdmin();
         _isLoading = false;
       });
@@ -51,6 +53,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           setState(() {
             _currentUser = AuthService.currentUser;
             _completedTests = _currentUser?.completedTests.length ?? 0;
+            _completedNotes = _currentUser?.completedNotes.length ?? 0;
             _isAdmin = AuthService.isAdmin();
             _isLoading = false;
           });
@@ -225,10 +228,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Colors.green,
                 ),
                 _buildStatCard(
-                  AppLocalizations.of(context)!.level,
-                  _getLevel(context),
-                  Icons.star,
-                  Colors.amber,
+                  AppLocalizations.of(context)!.notes_completed,
+                  '$_completedNotes',
+                  Icons.menu_book,
+                  Colors.deepPurple,
                 ),
               ],
             ),
@@ -406,12 +409,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
     );
-  }
-
-  String _getLevel(BuildContext context) {
-    if (_completedTests >= 15) return AppLocalizations.of(context)!.expert;
-    if (_completedTests >= 10) return AppLocalizations.of(context)!.experienced;
-    if (_completedTests >= 5) return AppLocalizations.of(context)!.intermediate;
-    return AppLocalizations.of(context)!.beginner;
   }
 }

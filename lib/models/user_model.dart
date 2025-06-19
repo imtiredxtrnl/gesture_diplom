@@ -5,6 +5,7 @@ class User {
   final String? profileImage;
   final String role; // 'user' или 'admin'
   final List<String> completedTests; // список ID пройденных тестов
+  final List<String> completedNotes; // список ID пройденных конспектов
 
   User({
     required this.username,
@@ -13,7 +14,9 @@ class User {
     this.profileImage,
     this.role = 'user',
     List<String>? completedTests,
-  }) : this.completedTests = completedTests ?? [];
+    List<String>? completedNotes,
+  })  : this.completedTests = completedTests ?? [],
+        this.completedNotes = completedNotes ?? [];
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
@@ -24,6 +27,9 @@ class User {
       role: json['role'] ?? 'user',
       completedTests: json['completedTests'] != null
           ? List<String>.from(json['completedTests'])
+          : [],
+      completedNotes: json['completedNotes'] != null
+          ? List<String>.from(json['completedNotes'])
           : [],
     );
   }
@@ -36,6 +42,7 @@ class User {
       'profileImage': profileImage,
       'role': role,
       'completedTests': completedTests,
+      'completedNotes': completedNotes,
     };
   }
 }

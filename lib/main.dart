@@ -6,7 +6,7 @@ import 'services/auth_service.dart';
 import 'services/test_data_service.dart';
 import 'services/gesture_data_service.dart';
 
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sign_language_app/l10n/app_localizations.dart';
 import 'package:sign_language_app/services/locale_service.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 

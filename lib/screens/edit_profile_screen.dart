@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../services/auth_service.dart';
 import '../models/user_model.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sign_language_app/l10n/app_localizations.dart';
 
 class EditProfileScreen extends StatefulWidget {
   @override

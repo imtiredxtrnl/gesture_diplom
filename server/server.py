@@ -9,12 +9,14 @@ import hashlib
 import os
 import uuid
 from datetime import datetime
+from deep_translator import GoogleTranslator
 
 # Путь к файлам данных
 USER_DATA_FILE = 'users.json'
 GESTURES_DATA_FILE = 'gestures.json'
 TESTS_DATA_FILE = 'tests.json'
 ALPHABET_DATA_FILE = 'alphabet.json'
+NOTES_DATA_FILE = 'notes.json'
 
 # Инициализация MediaPipe Hands
 import mediapipe as mp
@@ -71,6 +73,22 @@ def process_frame(frame):
             return gesture
     return "No Hand"
 
+def translate_note_text(text, src_lang, dest_lang):
+    import re
+    # Найти все [img:N] и заменить на плейсхолдеры
+    img_pattern = re.compile(r'\[img:(\d+)\]')
+    placeholders = []
+    def repl(match):
+        placeholders.append(match.group(0))
+        return f'__IMG_{len(placeholders)-1}__'
+    temp_text = img_pattern.sub(repl, text)
+    # Перевести текст
+    translated = GoogleTranslator(source=src_lang, target=dest_lang).translate(temp_text)
+    # Вернуть плейсхолдеры обратно
+    for idx, ph in enumerate(placeholders):
+        translated = translated.replace(f'__IMG_{idx}__', ph)
+    return translated
+
 # ============== AUTH HANDLERS ==============
 def handle_auth_request(request, users):
     action = request.get('action', 'login')
@@ -91,7 +109,8 @@ def handle_auth_request(request, users):
                         "name": users[email].get("name", ""),
                         "role": users[email].get("role", "user"),
                         "profileImage": users[email].get("photo", ""),
-                        "completedTests": users[email].get("completedTests", [])
+                        "completedTests": users[email].get("completedTests", []),
+                        "completedNotes": users[email].get("completedNotes", [])
                     }
                 }
                 print(f"Login successful for {email} (role: {users[email].get('role', 'user')})")
@@ -113,10 +132,11 @@ def handle_auth_request(request, users):
 
         users[email] = {
             "password": password,
-            "name": email.split('@')[0],
+            "name": request.get("name", email.split('@')[0]),
             "photo": "",
             "role": role,
-            "completedTests": []
+            "completedTests": [],
+            "completedNotes": request.get("completedNotes", [])
         }
         save_json_file(USER_DATA_FILE, users)
         print(f"User registered: {email}")
@@ -156,6 +176,9 @@ def handle_user_request(request, users):
 
             if 'profileImage' in data:
                 users[username]['photo'] = data['profileImage']
+
+            if 'completedNotes' in data:
+                users[username]['completedNotes'] = data['completedNotes']
 
             save_json_file(USER_DATA_FILE, users)
             print(f"Profile updated for {username}")
@@ -447,6 +470,131 @@ def handle_alphabet_request(request):
 
     return {"status": "error", "message": "Invalid alphabet action"}
 
+# ============== NOTE HANDLERS ==============
+def handle_note_request(request):
+    action = request.get('action')
+
+    if action == 'get_all':
+        notes = load_json_file(NOTES_DATA_FILE)
+        language = request.get('language', 'all')
+        if language != 'all' and isinstance(notes, dict):
+            filtered_notes = {k: v for k, v in notes.items() if v.get('language') == language}
+            return {
+                "status": "success",
+                "notes": list(filtered_notes.values())
+            }
+        return {
+            "status": "success",
+            "notes": list(notes.values()) if isinstance(notes, dict) else notes
+        }
+
+    elif action == 'get':
+        notes = load_json_file(NOTES_DATA_FILE)
+        note_id = request.get('id')
+        if note_id in notes:
+            note = notes[note_id]
+            # Обработка markup [img:N]
+            content = note.get('content', '')
+            image_paths = note.get('imagePaths', [])
+            images_base64 = []
+            for path in image_paths:
+                try:
+                    with open(path, 'rb') as img_file:
+                        images_base64.append(base64.b64encode(img_file.read()).decode('utf-8'))
+                except Exception:
+                    images_base64.append('')
+            return {
+                "status": "success",
+                "note": note,
+                "images": images_base64
+            }
+        else:
+            return {"status": "error", "message": "Note not found"}
+
+    elif action == 'create':
+        notes = load_json_file(NOTES_DATA_FILE)
+        if not isinstance(notes, dict):
+            notes = {}
+        # Автоинкремент id
+        existing_ids = [int(k) for k in notes.keys() if k.isdigit()]
+        new_id = str(max(existing_ids) + 1) if existing_ids else '1'
+        # Автоинкремент groupId
+        if 'groupId' in request and request['groupId']:
+            group_id = request['groupId']
+        else:
+            existing_group_ids = [int(v['groupId'].replace('group_', '')) for v in notes.values() if 'groupId' in v and v['groupId'].startswith('group_') and v['groupId'][6:].isdigit()]
+            new_group_id_num = max(existing_group_ids) + 1 if existing_group_ids else 1
+            group_id = f'group_{new_group_id_num}'
+        note_data = {
+            "id": new_id,
+            "groupId": group_id,
+            "title": request.get('title', ''),
+            "content": request.get('content', ''),
+            "imagePaths": request.get('imagePaths', []),
+            "language": request.get('language', 'uk'),
+            "created_at": datetime.now().isoformat(),
+            "updated_at": datetime.now().isoformat()
+        }
+        notes[new_id] = note_data
+        save_json_file(NOTES_DATA_FILE, notes)
+        return {
+            "status": "success",
+            "message": "Note created successfully",
+            "note": note_data
+        }
+
+    elif action == 'update':
+        notes = load_json_file(NOTES_DATA_FILE)
+        note_id = request.get('id')
+        if note_id in notes:
+            note_data = notes[note_id]
+            note_data.update({
+                "title": request.get('title', note_data.get('title')),
+                "content": request.get('content', note_data.get('content')),
+                "imagePaths": request.get('imagePaths', note_data.get('imagePaths')),
+                "language": request.get('language', note_data.get('language')),
+                "updated_at": datetime.now().isoformat()
+            })
+            notes[note_id] = note_data
+            save_json_file(NOTES_DATA_FILE, notes)
+            return {
+                "status": "success",
+                "message": "Note updated successfully",
+                "note": note_data
+            }
+        else:
+            return {"status": "error", "message": "Note not found"}
+
+    elif action == 'delete':
+        notes = load_json_file(NOTES_DATA_FILE)
+        note_id = request.get('id')
+        if note_id in notes:
+            deleted_note = notes.pop(note_id)
+            save_json_file(NOTES_DATA_FILE, notes)
+            return {
+                "status": "success",
+                "message": "Note deleted successfully",
+                "note": deleted_note
+            }
+        else:
+            return {"status": "error", "message": "Note not found"}
+
+    elif action == 'upload_image':
+        # Для drag-n-drop PNG загрузки
+        image_data = request.get('image')  # base64
+        filename = request.get('filename', f"note_{uuid.uuid4()}.png")
+        save_dir = os.path.join('data', 'notes')
+        os.makedirs(save_dir, exist_ok=True)
+        file_path = os.path.join(save_dir, filename)
+        try:
+            with open(file_path, 'wb') as f:
+                f.write(base64.b64decode(image_data))
+            return {"status": "success", "path": file_path}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+
+    return {"status": "error", "message": "Invalid note action"}
+
 # ============== MAIN HANDLER ==============
 async def handle_connection(websocket):
     print(f"Client connected from {websocket.remote_address}")
@@ -505,6 +653,37 @@ async def handle_connection(websocket):
                     print(f"Sending response: {json.dumps(response, ensure_ascii=False)}")
                     await websocket.send(json.dumps(response))
 
+                elif request_type == 'note':
+                    response = handle_note_request(request)
+                    print(f"Sending response: {json.dumps(response, ensure_ascii=False)[:500]} ...")
+                    await websocket.send(json.dumps(response))
+
+                elif request_type == 'note_translate':
+                    text = request.get('text', '')
+                    src_lang = request.get('src_lang', 'uk')
+                    dest_lang = request.get('dest_lang', 'en')
+                    try:
+                        translated = translate_note_text(text, src_lang, dest_lang)
+                        response = {"status": "success", "translated": translated}
+                    except Exception as e:
+                        response = {"status": "error", "message": str(e)}
+                    await websocket.send(json.dumps(response))
+
+                elif request_type == 'stats':
+                    users = load_json_file(USER_DATA_FILE)
+                    # Подсчёт уникальных пройденных конспектов всеми пользователями
+                    completed_notes = set()
+                    for u in users.values():
+                        for note_id in u.get('completedNotes', []):
+                            completed_notes.add(note_id)
+                    response = {
+                        "status": "success",
+                        "users_count": len(users),
+                        "completed_notes_count": len(completed_notes)
+                    }
+                    print(f"Sending response: {json.dumps(response, ensure_ascii=False)}")
+                    await websocket.send(json.dumps(response))
+
                 else:
                     print(f"Invalid request type: {request_type}")
                     error_resp = {"status": "error", "message": "Invalid request type"}
@@ -542,14 +721,16 @@ async def main():
                 "name": "User",
                 "photo": "",
                 "role": "user",
-                "completedTests": []
+                "completedTests": [],
+                "completedNotes": []
             },
             "admin@example.com": {
                 "password": "admin123",
                 "name": "Admin",
                 "photo": "",
                 "role": "admin",
-                "completedTests": []
+                "completedTests": [],
+                "completedNotes": []
             }
         }
         save_json_file(USER_DATA_FILE, default_users)
@@ -570,6 +751,18 @@ async def main():
         default_alphabet = {}
         save_json_file(ALPHABET_DATA_FILE, default_alphabet)
         print(f"Created alphabet file: {ALPHABET_DATA_FILE}")
+
+    if not os.path.exists(NOTES_DATA_FILE):
+        default_notes = {}
+        save_json_file(NOTES_DATA_FILE, default_notes)
+        print(f"Created notes file: {NOTES_DATA_FILE}")
+
+    # В структуре пользователя добавляем completedNotes если его нет
+    users = load_json_file(USER_DATA_FILE)
+    for user in users.values():
+        if 'completedNotes' not in user:
+            user['completedNotes'] = []
+    save_json_file(USER_DATA_FILE, users)
 
     print("Starting WebSocket server on ws://0.0.0.0:8765")
     async with websockets.serve(handle_connection, "0.0.0.0", 8765):

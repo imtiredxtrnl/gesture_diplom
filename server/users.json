@@ -4,7 +4,8 @@
         "name": "User",
         "photo": "",
         "role": "user",
-        "completedTests": []
+        "completedTests": [],
+        "completedNotes": []
     },
     "admin@example.com": {
         "password": "admin123",
@@ -14,6 +15,33 @@
         "completedTests": [
             "test_1",
             "8a5386a6-0d97-4372-9376-ada752e26ddd"
+        ],
+        "completedNotes": []
+    },
+    "test@gmail.com": {
+        "password": "123",
+        "name": "Gluhoi Boi",
+        "photo": "",
+        "role": "user",
+        "completedTests": [],
+        "completedNotes": []
+    },
+    "123": {
+        "password": "1231",
+        "name": "123",
+        "photo": "",
+        "role": "user",
+        "completedTests": [],
+        "completedNotes": [
+            "6"
         ]
+    },
+    "gay@tset.com": {
+        "password": "gay",
+        "name": "gay",
+        "photo": "",
+        "role": "user",
+        "completedTests": [],
+        "completedNotes": []
     }
 }

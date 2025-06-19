@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/alphabet_letter.dart';
 import '../services/admin_service.dart';
 import 'add_letter_screen.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sign_language_app/l10n/app_localizations.dart';
 
 class AdminAlphabetScreen extends StatefulWidget {
   @override

@@ -30,6 +30,7 @@
   "confirm_reset_progress": "Ви впевнені, що хочете скинути прогрес?",
   "progress_reset": "Прогрес скинуто!",
   "tests_completed": "Пройдено тестів",
+  "notes_completed": "Пройдено конспектів",
   "level": "Рівень",
   "beginner": "Початківець",
   "intermediate": "Середній",
@@ -248,5 +249,9 @@
   "editing_test": "Редагування тесту",
   "test_id": "ID тесту",
   "validation_test_question_length": "Питання тесту закоротке.",
-  "answer_option": "Варіант відповіді"
+  "answer_option": "Варіант відповіді",
+  "notes": "Конспекти",
+  "notes_description": "Ознайомтеся з теорією та корисними матеріалами",
+  "notes_management": "Керування конспектами",
+  "notes_management_desc": "Додавайте, редагуйте та видаляйте конспекти для користувачів."
 } 

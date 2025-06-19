@@ -4,7 +4,7 @@ import '../models/gesture.dart';
 import '../services/admin_service.dart';
 import 'gesture_practice_screen.dart';
 import 'dart:convert';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sign_language_app/l10n/app_localizations.dart';
 
 class GestureSelectionScreen extends StatefulWidget {
   @override

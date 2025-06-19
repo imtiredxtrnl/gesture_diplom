@@ -132,15 +132,16 @@ class AuthService {
   }
 
   // Функция регистрации
-  static Future<Map<String, dynamic>> register(String username, String password) async {
+  static Future<Map<String, dynamic>> register(String email, String password, String name) async {
     final request = {
       'type': 'auth',
       'action': 'register',
-      'username': username,
+      'email': email,
       'password': password,
+      'name': name,
+      'completedNotes': [],
       'role': 'user'
     };
-
     return await _sendRequest(request);
   }
 
@@ -227,6 +228,45 @@ class AuthService {
       return false;
     } catch (e) {
       print('Error saving completed test: $e');
+      return false;
+    }
+  }
+
+  // Обновление списка пройденных конспектов
+  static Future<bool> saveCompletedNote(String noteId) async {
+    if (currentUser == null) return false;
+
+    try {
+      if (!currentUser!.completedNotes.contains(noteId)) {
+        List<String> updatedNotes = List.from(currentUser!.completedNotes ?? [])..add(noteId);
+
+        final request = {
+          'type': 'user',
+          'action': 'update_profile',
+          'username': currentUser!.username,
+          'data': {
+            'completedNotes': updatedNotes,
+          },
+        };
+
+        final response = await _sendRequest(request);
+
+        if (response['status'] == 'success') {
+          // Обновление локального состояния
+          currentUser = User(
+            username: currentUser!.username,
+            password: currentUser!.password,
+            profileImage: currentUser!.profileImage,
+            role: currentUser!.role,
+            completedTests: currentUser!.completedTests,
+            completedNotes: updatedNotes,
+          );
+          return true;
+        }
+      }
+      return false;
+    } catch (e) {
+      print('Error saving completed note: $e');
       return false;
     }
   }

@@ -5,7 +5,7 @@ import '../models/test_model.dart';
 import '../services/auth_service.dart';
 import 'test_detail_screen.dart';
 import '../services/admin_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sign_language_app/l10n/app_localizations.dart';
 
 class TestsScreen extends StatefulWidget {
   @override

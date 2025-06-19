@@ -6,7 +6,8 @@ import 'profile_screen.dart';
 import '../services/auth_service.dart';
 import 'admin_panel_screen.dart';
 import 'auth_screen.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sign_language_app/l10n/app_localizations.dart';
+import 'notes_screen.dart';
 // Убедитесь, что нет импортов старых practice_screen.dart или
 
 class MainScreen extends StatefulWidget {

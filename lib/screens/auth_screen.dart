@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'main_screen.dart';
 import 'register_screen.dart';
 import '../services/auth_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sign_language_app/l10n/app_localizations.dart';
 
 class AuthScreen extends StatefulWidget {
   @override

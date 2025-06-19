@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'main_screen.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sign_language_app/l10n/app_localizations.dart';
+import 'package:sign_language_app/services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -20,17 +21,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void _register() async {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
-    final confirmPassword = _confirmPasswordController.text;
     final name = _nameController.text.trim();
+    final confirmPassword = _confirmPasswordController.text;
 
     // Валидация полей
-    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (email.isEmpty || password.isEmpty || name.isEmpty || confirmPassword.isEmpty) {
       setState(() {
         _errorMessage = AppLocalizations.of(context)!.validation_all_fields_required;
       });
       return;
     }
-
     if (password != confirmPassword) {
       setState(() {
         _errorMessage = AppLocalizations.of(context)!.validation_passwords_do_not_match;
@@ -44,65 +44,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _errorMessage = AppLocalizations.of(context)!.registration_in_progress;
     });
 
-    // Формирование данных для отправки
-    final registerData = json.encode({
-      'type': 'register',
-      'email': email,
-      'password': password,
-      'name': name,
-      'photo': '',
-    });
-
-    print("Sending registration data: $registerData");
-
     try {
-      // Создаем новый канал для регистрации
-      final registerChannel = WebSocketChannel.connect(Uri.parse('ws://10.0.2.2:8765'));
-
-      // Отправляем запрос на регистрацию
-      registerChannel.sink.add(registerData);
-
-      // Слушаем ответ
-      registerChannel.stream.listen((response) async {
-        print("Received register response: $response");
-        final responseData = json.decode(response);
-
-        setState(() {
-          _isRegistering = false;
+      // Используем AuthService для регистрации
+      final responseData = await AuthService.register(email, password, name);
+      setState(() {
+        _isRegistering = false;
+      });
+      if (responseData['status'] == 'Success' || responseData['status'] == 'success') {
+        await Future.delayed(Duration(milliseconds: 500));
+        final checkChannel = WebSocketChannel.connect(Uri.parse('ws://10.0.2.2:8765'));
+        final checkData = json.encode({
+          'type': 'auth',
+          'action': 'login',
+          'email': email,
+          'password': password,
         });
-
-        if (responseData['status'] == 'Success') {
-          // Показываем сообщение об успешной регистрации
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(AppLocalizations.of(context)!.registration_success))
+        checkChannel.sink.add(checkData);
+        final checkResp = await checkChannel.stream.first;
+        checkChannel.sink.close();
+        final checkResponse = json.decode(checkResp);
+        if (checkResponse['status'] == 'Login successful' || checkResponse['status'] == 'success') {
+          // Корректно авторизуем пользователя и сохраняем в кэш
+          await AuthService.login(email, password);
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => MainScreen()),
+            (route) => false,
           );
-
-          // Возвращаемся на экран входа
-          Navigator.pop(context);
         } else {
           setState(() {
-            _errorMessage = responseData['message'] ?? AppLocalizations.of(context)!.registration_error;
+            _errorMessage = AppLocalizations.of(context)!.registration_success + '\n' + (checkResponse['message'] ?? '');
           });
         }
-
-        // Закрываем канал
-        registerChannel.sink.close();
-      }, onError: (error) {
-        print("Register WebSocket error: $error");
+      } else {
         setState(() {
-          _isRegistering = false;
-          _errorMessage = AppLocalizations.of(context)!.connection_error + ': $error';
+          _errorMessage = responseData['message'] ?? AppLocalizations.of(context)!.registration_error;
         });
-        // Закрываем канал
-        registerChannel.sink.close();
-      }, onDone: () {
-        if (_isRegistering) {
-          setState(() {
-            _isRegistering = false;
-            _errorMessage = AppLocalizations.of(context)!.connection_closed_before_response;
-          });
-        }
-      });
+      }
     } catch (e) {
       setState(() {
         _isRegistering = false;

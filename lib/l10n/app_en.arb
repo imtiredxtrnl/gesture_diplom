@@ -30,6 +30,7 @@
   "confirm_reset_progress": "Are you sure you want to reset your progress?",
   "progress_reset": "Progress reset!",
   "tests_completed": "Tests completed",
+  "notes_completed": "Notes completed",
   "level": "Level",
   "beginner": "Beginner",
   "intermediate": "Intermediate",
@@ -250,5 +251,9 @@
   "editing_test": "Editing Test",
   "test_id": "Test ID",
   "validation_test_question_length": "The test question is too short.",
-  "answer_option": "Answer option"
+  "answer_option": "Answer option",
+  "notes": "Notes",
+  "notes_description": "Learn theory and useful materials",
+  "notes_management": "Notes management",
+  "notes_management_desc": "Add, edit and delete notes for users."
 } 

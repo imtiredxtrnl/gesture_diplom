@@ -4,7 +4,9 @@ import '../screens/dictionary_screen.dart';
 import '../screens/alphabet_selection_screen.dart';
 import '../screens/tests_screen.dart';
 import '../screens/gesture_selection_screen.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../screens/notes_screen.dart';
+import 'package:sign_language_app/l10n/app_localizations.dart';
+import 'package:sign_language_app/services/auth_service.dart';
 
 class GesturesScreen extends StatelessWidget {
   @override
@@ -58,6 +60,23 @@ class GesturesScreen extends StatelessWidget {
                 () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => TestsScreen())
+            ),
+          ),
+          SizedBox(height: 16),
+          _buildCategoryCard(
+            context,
+            AppLocalizations.of(context)!.notes,
+            AppLocalizations.of(context)!.notes_description,
+            Icons.menu_book,
+            Colors.deepPurple,
+            () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => NotesScreen(
+                  userId: AuthService.currentUser?.username,
+                  completedNotes: AuthService.currentUser?.completedNotes ?? [],
+                ),
+              ),
             ),
           ),
         ],

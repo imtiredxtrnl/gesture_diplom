@@ -1,9 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:sign_language_app/l10n/app_localizations.dart';
 import 'admin_gestures_screen.dart';
 import 'admin_tests_screen.dart';
+import 'admin_notes_screen.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'dart:io';
 
-class AdminPanelScreen extends StatelessWidget {
+class AdminPanelScreen extends StatefulWidget {
+  @override
+  _AdminPanelScreenState createState() => _AdminPanelScreenState();
+}
+
+class _AdminPanelScreenState extends State<AdminPanelScreen> {
+  int? usersCount;
+  int? completedNotesCount;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchStats();
+  }
+
+  Future<void> fetchStats() async {
+    try {
+      final channel = WebSocketChannel.connect(Uri.parse(
+        Platform.isAndroid ? 'ws://10.0.2.2:8765' : 'ws://localhost:8765',
+      ));
+      channel.sink.add('{"type": "stats"}');
+      final resp = await channel.stream.first;
+      channel.sink.close();
+      final data = jsonDecode(resp);
+      if (data['status'] == 'success') {
+        setState(() {
+          usersCount = data['users_count'];
+          completedNotesCount = data['completed_notes_count'];
+        });
+      }
+    } catch (e) {
+      setState(() {
+        usersCount = null;
+        completedNotesCount = null;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,24 +58,17 @@ class AdminPanelScreen extends StatelessWidget {
             _buildSectionTitle(context, 'statistics'),
             SizedBox(height: 16),
             _buildStatCard(
-              AppLocalizations.of(context)!.total_users,
-              '1',
+              'Пользователи',
+              usersCount != null ? usersCount.toString() : '...',
               Icons.people,
               Colors.orange,
             ),
             SizedBox(height: 12),
             _buildStatCard(
-              AppLocalizations.of(context)!.gestures_in_dict,
-              '5',
-              Icons.category,
-              Colors.teal,
-            ),
-            SizedBox(height: 12),
-            _buildStatCard(
-              AppLocalizations.of(context)!.tests,
-              '5',
-              Icons.assignment,
-              Colors.indigo,
+              'Пройдено конспектов',
+              completedNotesCount != null ? completedNotesCount.toString() : '...',
+              Icons.menu_book,
+              Colors.deepPurple,
             ),
             SizedBox(height: 24),
             _buildAdminCard(
@@ -45,6 +80,20 @@ class AdminPanelScreen extends StatelessWidget {
                   () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => AdminTestsScreen()),
+              ),
+            ),
+            SizedBox(height: 12),
+            _buildAdminCard(
+              context,
+              AppLocalizations.of(context)!.notes_management,
+              AppLocalizations.of(context)!.notes_management_desc,
+              Icons.menu_book,
+              Colors.deepPurple,
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AdminNotesScreen(language: Localizations.localeOf(context).languageCode),
+                ),
               ),
             ),
           ],
