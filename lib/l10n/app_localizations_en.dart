@@ -688,4 +688,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get notes_management_desc => 'Add, edit and delete notes for users.';
+
+  @override
+  String get gestures_completed => 'Gestures completed';
+
+  @override
+  String get add_option => 'Add option';
+
+  @override
+  String get remove_option => 'Remove option';
 }

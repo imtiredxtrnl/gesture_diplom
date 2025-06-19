@@ -29,18 +29,6 @@ class GesturesScreen extends StatelessWidget {
           SizedBox(height: 16),
           _buildCategoryCard(
             context,
-            AppLocalizations.of(context)!.gestures_practice,
-            AppLocalizations.of(context)!.gestures_practice_description,
-            Icons.camera_alt,
-            Colors.teal[700]!,
-                () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => GestureSelectionScreen())
-            ),
-          ),
-          SizedBox(height: 16),
-          _buildCategoryCard(
-            context,
             AppLocalizations.of(context)!.gestures_alphabet,
             AppLocalizations.of(context)!.gestures_alphabet_description,
             Icons.text_fields,

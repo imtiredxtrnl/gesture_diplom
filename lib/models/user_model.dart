@@ -5,6 +5,7 @@ class User {
   final String? profileImage;
   final String role; // 'user' или 'admin'
   final List<String> completedTests; // список ID пройденных тестов
+  final List<String> completedGestures; // список ID пройденных жестов
   final List<String> completedNotes; // список ID пройденных конспектов
 
   User({
@@ -14,8 +15,10 @@ class User {
     this.profileImage,
     this.role = 'user',
     List<String>? completedTests,
+    List<String>? completedGestures,
     List<String>? completedNotes,
   })  : this.completedTests = completedTests ?? [],
+        this.completedGestures = completedGestures ?? [],
         this.completedNotes = completedNotes ?? [];
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -27,6 +30,9 @@ class User {
       role: json['role'] ?? 'user',
       completedTests: json['completedTests'] != null
           ? List<String>.from(json['completedTests'])
+          : [],
+      completedGestures: json['completedGestures'] != null
+          ? List<String>.from(json['completedGestures'])
           : [],
       completedNotes: json['completedNotes'] != null
           ? List<String>.from(json['completedNotes'])
@@ -42,6 +48,7 @@ class User {
       'profileImage': profileImage,
       'role': role,
       'completedTests': completedTests,
+      'completedGestures': completedGestures,
       'completedNotes': completedNotes,
     };
   }

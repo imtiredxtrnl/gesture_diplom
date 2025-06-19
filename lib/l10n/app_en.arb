@@ -255,5 +255,8 @@
   "notes": "Notes",
   "notes_description": "Learn theory and useful materials",
   "notes_management": "Notes management",
-  "notes_management_desc": "Add, edit and delete notes for users."
+  "notes_management_desc": "Add, edit and delete notes for users.",
+  "gestures_completed": "Gestures completed",
+  "add_option": "Add option",
+  "remove_option": "Remove option"
 } 

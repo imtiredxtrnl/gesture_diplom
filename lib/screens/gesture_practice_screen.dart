@@ -8,13 +8,14 @@ import '../services/camera_manager.dart';
 import '../services/gesture_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_language_app/l10n/app_localizations.dart';
+import '../services/admin_service.dart';
 
 class GesturePracticeScreen extends StatefulWidget {
-  final Gesture gesture;
+  final Gesture? gesture;
 
   const GesturePracticeScreen({
     Key? key,
-    required this.gesture,
+    this.gesture,
   }) : super(key: key);
 
   @override
@@ -50,96 +51,51 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
   List<String> _instructions = [];
   int _currentInstructionIndex = 0;
 
+  List<Gesture> _allGestures = [];
+  Gesture? _currentGesture;
+
   @override
   void initState() {
     super.initState();
-    print("GesturePracticeScreen: initState вызван для жеста ${widget.gesture.name}");
+    print("GesturePracticeScreen: initState вызван для жеста ${widget.gesture?.name}");
     WidgetsBinding.instance.addObserver(this);
-    _setInstructionsForGesture();
-
-    // Отложим инициализацию камеры, чтобы экран успел построиться
-    Future.delayed(Duration(milliseconds: 100), () {
-      if (mounted) {
-        _initializeCamera();
-        _connectWebSocket();
-      }
-    });
+    _loadAllGestures();
   }
 
-  void _setInstructionsForGesture() {
-    // Задаем инструкции в зависимости от типа жеста
-    switch(widget.gesture.name) {
-      case "Привет":
-        _instructions = [
-          "Поднимите руку на уровень плеча",
-          "Разверните ладонь к камере",
-          "Расправьте все пальцы",
-          "Покачайте рукой из стороны в сторону"
-        ];
-        break;
-      case "Спасибо":
-        _instructions = [
-          "Поднесите ладонь к подбородку",
-          "Коснитесь кончиками пальцев подбородка",
-          "Опустите руку вперед и вниз"
-        ];
-        break;
-      case "Да":
-        _instructions = [
-          "Сожмите руку в кулак",
-          "Поднимите большой палец вверх",
-          "Держите руку перед собой"
-        ];
-        break;
-      case "Нет":
-        _instructions = [
-          "Поднимите указательный палец",
-          "Остальные пальцы согните в кулак",
-          "Покачайте пальцем из стороны в сторону"
-        ];
-        break;
-      case "Хорошо":
-        _instructions = [
-          "Соедините большой и указательный палец",
-          "Образуйте кольцо",
-          "Остальные пальцы выпрямите"
-        ];
-        break;
-      case "Плохо":
-        _instructions = [
-          "Сожмите руку в кулак",
-          "Опустите большой палец вниз",
-          "Держите руку перед собой"
-        ];
-        break;
-      case "Стоп":
-        _instructions = [
-          "Поднимите руку на уровень плеча",
-          "Раскройте ладонь",
-          "Направьте ладонь к камере"
-        ];
-        break;
-      case "Помощь":
-        _instructions = [
-          "Поднимите обе руки вверх",
-          "Разведите руки в стороны",
-          "Покачайте руками"
-        ];
-        break;
-      case "Любовь":
-        _instructions = [
-          "Сложите руки в форме сердца",
-          "Поднесите к груди",
-          "Удерживайте позицию"
-        ];
-        break;
-      default:
-        _instructions = [
-          "Изучите изображение жеста",
-          "Повторите его перед камерой",
-          "Удерживайте правильное положение руки"
-        ];
+  Future<void> _loadAllGestures() async {
+    final adminService = AdminService();
+    final gestures = await adminService.getAllGestures();
+    setState(() {
+      _allGestures = gestures;
+      // Найти жест с тем же id, что и был выбран ранее
+      if (_currentGesture != null) {
+        final match = gestures.firstWhere(
+          (g) => g.id == _currentGesture!.id,
+          orElse: () => gestures[0],
+        );
+        _currentGesture = match;
+      } else {
+        _currentGesture = gestures.isNotEmpty ? gestures[0] : null;
+      }
+    });
+    if (_currentGesture != null) {
+      _setInstructionsForGesture(_currentGesture!);
+      Future.delayed(Duration(milliseconds: 100), () {
+        if (mounted) {
+          _initializeCamera();
+          _connectWebSocket();
+        }
+      });
     }
+  }
+
+  void _setInstructionsForGesture(Gesture gesture) {
+    // Можно реализовать инструкции для каждого жеста, либо оставить универсальные
+    _instructions = [
+      "Изучите изображение жеста",
+      "Повторите его перед камерой",
+      "Удерживайте правильное положение руки"
+    ];
   }
 
   @override
@@ -170,9 +126,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
           if (response.containsKey('gesture')) {
             setState(() {
               final gesture = response['gesture'];
-              _detectedGesture = _translateGesture(gesture);
-
-              // Проверяем соответствие распознанного жеста целевому
+              _detectedGesture = gesture;
               _checkGestureMatch(gesture);
             });
           }
@@ -203,67 +157,48 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
   }
 
   void _checkGestureMatch(String detectedGesture) {
-    // Примеры соответствия распознанных жестов и целевых
-    bool isMatch = false;
-
-    switch(widget.gesture.name) {
-      case "Привет":
-        isMatch = detectedGesture == "Open Palm";
-        break;
-      case "Спасибо":
-        isMatch = detectedGesture == "Pointing";
-        break;
-      case "Пожалуйста":
-        isMatch = detectedGesture == "Open Palm";
-        break;
-      case "Да":
-        isMatch = detectedGesture == "Thumbs Up";
-        break;
-      case "Нет":
-        isMatch = detectedGesture == "Pointing";
-        break;
-      case "Хорошо":
-        isMatch = detectedGesture == "Victory";
-        break;
-      case "Плохо":
-        isMatch = detectedGesture == "Fist";
-        break;
-      case "Стоп":
-        isMatch = detectedGesture == "Open Palm";
-        break;
-      case "Помощь":
-        isMatch = detectedGesture == "Open Palm";
-        break;
-      case "Любовь":
-        isMatch = detectedGesture == "Victory";
-        break;
-      default:
-        isMatch = false;
-    }
-
+    final locale = Localizations.localeOf(context).languageCode;
+    final targetName = locale == 'en'
+        ? _currentGesture?.nameEn ?? _currentGesture?.name
+        : _currentGesture?.name;
+    final altName = locale == 'en'
+        ? _currentGesture?.name
+        : _currentGesture?.nameEn;
+    final detected = detectedGesture.trim().toLowerCase();
+    final target = (targetName ?? '').trim().toLowerCase();
+    final alt = (altName ?? '').trim().toLowerCase();
+    print('Сравнение жестов: detected="$detected", target="$target", alt="$alt"');
+    final isMatch = detected == target || (alt.isNotEmpty && detected == alt);
     setState(() {
-      _isSuccess = isMatch;
-
-      // Если жест правильный, увеличиваем счетчик успеха
       if (isMatch) {
         _successCounter++;
-
-        // Переходим к следующей инструкции
+        _isSuccess = true;
         if (_currentInstructionIndex < _instructions.length - 1) {
           _currentInstructionIndex++;
         }
-
-        // Если набрали нужное количество успешных распознаваний, считаем практику завершенной
         if (_successCounter >= _requiredSuccessCount) {
           _showSuccessDialog();
           _pauseTimers();
         }
       } else {
-        // При неправильном жесте сбрасываем счетчик
-        _successCounter = 0;
-        // Возвращаемся к первой инструкции
+        _isSuccess = false;
+        // Сбрасываем счетчик только если был успех и теперь ошибка
+        if (_successCounter > 0) {
+          _successCounter = 0;
+        }
         _currentInstructionIndex = 0;
       }
+    });
+  }
+
+  // При смене жеста сбрасываем счетчик
+  void _onGestureChanged(Gesture g) {
+    setState(() {
+      _currentGesture = g;
+      _setInstructionsForGesture(g);
+      _successCounter = 0;
+      _currentInstructionIndex = 0;
+      _isSuccess = false;
     });
   }
 
@@ -329,7 +264,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
           'type': 'gesture',
           'image': base64Image,
           'practice_mode': true,
-          'target_gesture': widget.gesture.name,
+          'target_gesture': _currentGesture?.name,
         });
 
         _channel!.sink.add(request);
@@ -414,7 +349,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
 
   void _showSuccessDialog() async {
     // Отмечаем жест как изученный
-    await _gestureService.markGestureAsLearned(widget.gesture.id);
+    await _gestureService.markGestureAsLearned(_currentGesture?.id ?? '');
 
     // Инкрементируем счетчики статистики
     final prefs = await SharedPreferences.getInstance();
@@ -439,7 +374,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
             ),
             SizedBox(height: 16),
             Text(
-              AppLocalizations.of(context)!.success_message(widget.gesture.name),
+              AppLocalizations.of(context)!.success_message(_currentGesture?.name ?? ''),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 8),
@@ -583,6 +518,23 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
               Navigator.of(context).pop();
             },
           ),
+          actions: [
+            if (_allGestures.length > 1)
+              DropdownButton<Gesture>(
+                value: _allGestures.contains(_currentGesture) ? _currentGesture : (_allGestures.isNotEmpty ? _allGestures[0] : null),
+                onChanged: (g) {
+                  if (g != null) _onGestureChanged(g);
+                },
+                items: _allGestures.map((g) {
+                  final locale = Localizations.localeOf(context).languageCode;
+                  final title = locale == 'en' ? g.nameEn ?? g.name : g.name;
+                  return DropdownMenuItem(
+                    value: g,
+                    child: Text(title),
+                  );
+                }).toList(),
+              ),
+          ],
         ),
         body: Column(
           children: [
@@ -608,7 +560,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Image.asset(
-                        widget.gesture.imagePath,
+                        _currentGesture?.imagePath ?? '',
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) {
                           return Icon(Icons.gesture, color: Colors.grey);
@@ -630,7 +582,7 @@ class _GesturePracticeScreenState extends State<GesturePracticeScreen> with Widg
                         ),
                         SizedBox(height: 4),
                         Text(
-                          widget.gesture.name,
+                          _currentGesture?.name ?? '',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,

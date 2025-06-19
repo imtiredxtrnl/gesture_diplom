@@ -686,4 +686,13 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String get notes_management_desc =>
       'Додавайте, редагуйте та видаляйте конспекти для користувачів.';
+
+  @override
+  String get gestures_completed => 'Пройдено жестів';
+
+  @override
+  String get add_option => 'Добавить вариант';
+
+  @override
+  String get remove_option => 'Удалить вариант';
 }

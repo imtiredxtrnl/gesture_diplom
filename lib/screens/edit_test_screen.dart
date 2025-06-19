@@ -16,9 +16,7 @@ class EditTestScreen extends StatefulWidget {
 class _EditTestScreenState extends State<EditTestScreen> {
   final _formKey = GlobalKey<FormState>();
   final _questionController = TextEditingController();
-  final List<TextEditingController> _optionControllers = List.generate(
-      4, (_) => TextEditingController()
-  );
+  List<TextEditingController> _optionControllers = [];
   final AdminService _adminService = AdminService();
 
   String _selectedCategory = 'basic';
@@ -37,6 +35,9 @@ class _EditTestScreenState extends State<EditTestScreen> {
     'numbers',
   ];
 
+  static const int _minOptions = 2;
+  static const int _maxOptions = 8;
+
   @override
   void initState() {
     super.initState();
@@ -45,10 +46,13 @@ class _EditTestScreenState extends State<EditTestScreen> {
     _selectedCategory = widget.test.category;
     _correctOptionIndex = widget.test.correctOptionIndex;
 
-    // Заполняем варианты ответов
-    for (int i = 0; i < widget.test.options.length && i < 4; i++) {
-      _optionControllers[i].text = widget.test.options[i];
-    }
+    // Заполняем варианты ответов динамически
+    _optionControllers = List.generate(
+      widget.test.options.length < _minOptions ? _minOptions : widget.test.options.length,
+      (i) => TextEditingController(
+        text: i < widget.test.options.length ? widget.test.options[i] : '',
+      ),
+    );
 
     // Добавляем слушателей для отслеживания изменений
     _questionController.addListener(_onFieldChanged);
@@ -80,8 +84,9 @@ class _EditTestScreenState extends State<EditTestScreen> {
   }
 
   bool _optionsChanged() {
-    for (int i = 0; i < widget.test.options.length && i < 4; i++) {
-      if (_optionControllers[i].text != widget.test.options[i]) {
+    if (_optionControllers.length != widget.test.options.length) return true;
+    for (int i = 0; i < _optionControllers.length; i++) {
+      if (i >= widget.test.options.length || _optionControllers[i].text != widget.test.options[i]) {
         return true;
       }
     }
@@ -331,7 +336,47 @@ class _EditTestScreenState extends State<EditTestScreen> {
                 ),
                 SizedBox(height: 16),
 
-                ...List.generate(4, (index) => _buildOptionField(index)),
+                Column(
+                  children: [
+                    ...List.generate(_optionControllers.length, (index) => _buildOptionField(index)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.remove_circle, color: _optionControllers.length > _minOptions ? Colors.red : Colors.grey),
+                          tooltip: AppLocalizations.of(context)!.remove_option,
+                          onPressed: _optionControllers.length > _minOptions
+                              ? () {
+                                  setState(() {
+                                    if (_optionControllers.length > _minOptions) {
+                                      _optionControllers.last.dispose();
+                                      _optionControllers.removeLast();
+                                      if (_correctOptionIndex >= _optionControllers.length) {
+                                        _correctOptionIndex = 0;
+                                      }
+                                    }
+                                  });
+                                  _onFieldChanged();
+                                }
+                              : null,
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.add_circle, color: _optionControllers.length < _maxOptions ? Colors.green : Colors.grey),
+                          tooltip: AppLocalizations.of(context)!.add_option,
+                          onPressed: _optionControllers.length < _maxOptions
+                              ? () {
+                                  setState(() {
+                                    _optionControllers.add(TextEditingController());
+                                    _optionControllers.last.addListener(_onFieldChanged);
+                                  });
+                                  _onFieldChanged();
+                                }
+                              : null,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
 
                 SizedBox(height: 32),
 
@@ -395,7 +440,7 @@ class _EditTestScreenState extends State<EditTestScreen> {
             child: TextFormField(
               controller: _optionControllers[index],
               decoration: InputDecoration(
-                labelText: AppLocalizations.of(context)!.option + ' ${index + 1}',
+                labelText: AppLocalizations.of(context)!.option + ' 	${index + 1}',
                 hintText: isCorrect ? AppLocalizations.of(context)!.correct_answer : AppLocalizations.of(context)!.answer_option,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -409,8 +454,15 @@ class _EditTestScreenState extends State<EditTestScreen> {
                 ),
               ),
               validator: (value) {
-                if (index < 2 && (value == null || value.isEmpty)) {
-                  return AppLocalizations.of(context)!.validation_option;
+                if (_optionControllers.length <= _minOptions) {
+                  if (value == null || value.isEmpty) {
+                    return AppLocalizations.of(context)!.validation_option;
+                  }
+                } else {
+                  // Если больше двух, валидируем только первые два
+                  if (index < 2 && (value == null || value.isEmpty)) {
+                    return AppLocalizations.of(context)!.validation_option;
+                  }
                 }
                 return null;
               },

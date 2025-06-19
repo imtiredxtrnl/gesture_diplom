@@ -14,6 +14,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   User? _currentUser;
   int _completedTests = 0;
+  int _completedGestures = 0;
   int _completedNotes = 0;
   bool _isAdmin = false;
   bool _isLoading = true;
@@ -33,6 +34,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _currentUser = AuthService.currentUser;
         _completedTests = _currentUser?.completedTests.length ?? 0;
+        _completedGestures = _currentUser?.completedGestures.length ?? 0;
         _completedNotes = _currentUser?.completedNotes.length ?? 0;
         _isAdmin = AuthService.isAdmin();
         _isLoading = false;
@@ -53,6 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           setState(() {
             _currentUser = AuthService.currentUser;
             _completedTests = _currentUser?.completedTests.length ?? 0;
+            _completedGestures = _currentUser?.completedGestures.length ?? 0;
             _completedNotes = _currentUser?.completedNotes.length ?? 0;
             _isAdmin = AuthService.isAdmin();
             _isLoading = false;
@@ -221,11 +224,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildStatCard(
-                  AppLocalizations.of(context)!.tests_completed,
-                  '$_completedTests',
-                  Icons.assignment_turned_in,
-                  Colors.green,
+                ProfileStatCard(
+                  icon: Icons.assignment_turned_in,
+                  label: AppLocalizations.of(context)!.tests_completed,
+                  value: '$_completedTests',
+                ),
+                ProfileStatCard(
+                  icon: Icons.pan_tool_alt,
+                  label: AppLocalizations.of(context)!.gestures_completed,
+                  value: '$_completedGestures',
                 ),
                 _buildStatCard(
                   AppLocalizations.of(context)!.notes_completed,
@@ -408,6 +415,63 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ],
         ),
+    );
+  }
+}
+
+class ProfileStatCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  const ProfileStatCard({
+    Key? key,
+    required this.icon,
+    required this.label,
+    required this.value,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    const Color iconColor = Colors.deepPurple;
+    return Container(
+      width: 90,
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.deepPurple[50],
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              icon,
+              color: iconColor,
+              size: 26,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey[700],
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            softWrap: true,
+          ),
+        ],
+      ),
     );
   }
 }

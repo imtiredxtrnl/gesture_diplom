@@ -16,7 +16,11 @@
             "test_1",
             "8a5386a6-0d97-4372-9376-ada752e26ddd"
         ],
-        "completedNotes": []
+        "completedNotes": [
+            "1",
+            "2",
+            "5"
+        ]
     },
     "test@gmail.com": {
         "password": "123",
@@ -43,5 +47,14 @@
         "role": "user",
         "completedTests": [],
         "completedNotes": []
+    },
+    "pierr@gmail.com": {
+        "password": "123",
+        "name": "Pierre",
+        "photo": "",
+        "role": "user",
+        "completedTests": [],
+        "completedNotes": [],
+        "completedGestures": []
     }
 }

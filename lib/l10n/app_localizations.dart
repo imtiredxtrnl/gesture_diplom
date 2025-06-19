@@ -1417,6 +1417,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Add, edit and delete notes for users.'**
   String get notes_management_desc;
+
+  /// No description provided for @gestures_completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Gestures completed'**
+  String get gestures_completed;
+
+  /// No description provided for @add_option.
+  ///
+  /// In en, this message translates to:
+  /// **'Add option'**
+  String get add_option;
+
+  /// No description provided for @remove_option.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove option'**
+  String get remove_option;
 }
 
 class _AppLocalizationsDelegate

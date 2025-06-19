@@ -147,6 +147,30 @@ class GestureService {
       if (!learnedGestures.contains(gestureId)) {
         learnedGestures.add(gestureId);
         await prefs.setStringList('learned_gestures', learnedGestures);
+
+        // --- Синхронизация с сервером ---
+        final username = prefs.getString('username') ?? '';
+        if (username.isNotEmpty) {
+          final request = {
+            'type': 'user',
+            'action': 'update_profile',
+            'username': username,
+            'data': {
+              'completedGestures': learnedGestures,
+            },
+          };
+          try {
+            final channel = WebSocketChannel.connect(Uri.parse(_serverUrl));
+            channel.sink.add(json.encode(request));
+            // Можно дождаться ответа, если нужно
+            // await channel.stream.first;
+            await Future.delayed(Duration(milliseconds: 300));
+            await channel.sink.close();
+          } catch (e) {
+            print('Ошибка синхронизации жестов с сервером: $e');
+          }
+        }
+        // --- конец синхронизации ---
       }
 
       return true;

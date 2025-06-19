@@ -75,11 +75,15 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
       result = result.where((gesture) => gesture.category == selectedCategory).toList();
     }
 
+    final locale = Localizations.localeOf(context).languageCode;
+
     // Фильтрация по поисковому запросу
     if (searchQuery.isNotEmpty) {
       result = result.where((gesture) =>
-      gesture.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
-          gesture.description.toLowerCase().contains(searchQuery.toLowerCase())
+        (locale == 'en'
+          ? (gesture.nameEn?.toLowerCase() ?? '').contains(searchQuery.toLowerCase()) || (gesture.descriptionEn?.toLowerCase() ?? '').contains(searchQuery.toLowerCase())
+          : gesture.name.toLowerCase().contains(searchQuery.toLowerCase()) || gesture.description.toLowerCase().contains(searchQuery.toLowerCase())
+        )
       ).toList();
     }
 
@@ -113,6 +117,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.dictionary),
@@ -253,6 +258,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
   }
 
   Widget _buildGestureCard(Gesture gesture) {
+    final locale = Localizations.localeOf(context).languageCode;
     return Card(
       margin: EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -326,7 +332,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                       children: [
                         Expanded(
                           child: Text(
-                            gesture.name,
+                            locale == 'en' ? gesture.nameEn ?? gesture.name : gesture.name,
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -355,9 +361,7 @@ class _DictionaryScreenState extends State<DictionaryScreen> {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      gesture.description.length > 80
-                          ? '${gesture.description.substring(0, 80)}...'
-                          : gesture.description,
+                      locale == 'en' ? gesture.descriptionEn ?? gesture.description : gesture.description,
                       style: TextStyle(
                         color: Colors.grey[600],
                         fontSize: 14,

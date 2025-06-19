@@ -133,16 +133,18 @@ class AuthService {
 
   // Функция регистрации
   static Future<Map<String, dynamic>> register(String email, String password, String name) async {
-    final request = {
+    final response = await _sendRequest({
       'type': 'auth',
       'action': 'register',
       'email': email,
       'password': password,
       'name': name,
+      'role': 'user',
       'completedNotes': [],
-      'role': 'user'
-    };
-    return await _sendRequest(request);
+      'completedTests': [],
+      'completedGestures': [],
+    });
+    return response;
   }
 
   // Функция логина

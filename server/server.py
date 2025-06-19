@@ -37,7 +37,7 @@ def save_json_file(file_path, data):
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
 
-def recognize_gesture(landmarks):
+def recognize_gesture(landmarks, language='uk'):
     def is_finger_up(start_idx, mid_idx, end_idx):
         return landmarks[end_idx].y < landmarks[mid_idx].y < landmarks[start_idx].y
 
@@ -49,27 +49,48 @@ def recognize_gesture(landmarks):
         "pinky": is_finger_up(17, 18, 20),
     }
 
-    if all(finger_states.values()):
-        return "Open Palm"
-    elif not any(finger_states.values()):
-        return "Fist"
-    elif finger_states["thumb"] and not any([finger_states["index"], finger_states["middle"], finger_states["ring"], finger_states["pinky"]]):
-        return "Thumbs Up"
-    elif finger_states["index"] and finger_states["middle"] and not any([finger_states["thumb"], finger_states["ring"], finger_states["pinky"]]):
-        return "Victory"
-    elif finger_states["index"] and not any([finger_states["thumb"], finger_states["middle"], finger_states["ring"], finger_states["pinky"]]):
-        return "Pointing"
-    elif finger_states["index"] and finger_states["pinky"] and not any([finger_states["thumb"], finger_states["middle"], finger_states["ring"]]):
-        return "Rock"
-    else:
-        return "Unknown"
+    # Локализация жестів
+    gestures_uk = {
+        "open_palm": "Привіт",
+        "fist": "Так",
+        "thumbs_up": "Добре",
+        "victory": "Молодець",
+        "pointing": "Вказівний",
+        "rock": "Рок",
+        "unknown": "Невідомо"
+    }
+    gestures_en = {
+        "open_palm": "Hello",
+        "fist": "Yes",
+        "thumbs_up": "Good",
+        "victory": "Well done",
+        "pointing": "Pointing",
+        "rock": "Rock",
+        "unknown": "Unknown"
+    }
+    g = gestures_uk if language == 'uk' else gestures_en
 
-def process_frame(frame):
+    if all(finger_states.values()):
+        return g["open_palm"]
+    elif not any(finger_states.values()):
+        return g["fist"]
+    elif finger_states["thumb"] and not any([finger_states["index"], finger_states["middle"], finger_states["ring"], finger_states["pinky"]]):
+        return g["thumbs_up"]
+    elif finger_states["index"] and finger_states["middle"] and not any([finger_states["thumb"], finger_states["ring"], finger_states["pinky"]]):
+        return g["victory"]
+    elif finger_states["index"] and not any([finger_states["thumb"], finger_states["middle"], finger_states["ring"], finger_states["pinky"]]):
+        return g["pointing"]
+    elif finger_states["index"] and finger_states["pinky"] and not any([finger_states["thumb"], finger_states["middle"], finger_states["ring"]]):
+        return g["rock"]
+    else:
+        return g["unknown"]
+
+def process_frame(frame, language='uk'):
     image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     results = hands.process(image_rgb)
     if results.multi_hand_landmarks:
         for hand_landmarks in results.multi_hand_landmarks:
-            gesture = recognize_gesture(hand_landmarks.landmark)
+            gesture = recognize_gesture(hand_landmarks.landmark, language)
             return gesture
     return "No Hand"
 
@@ -110,7 +131,8 @@ def handle_auth_request(request, users):
                         "role": users[email].get("role", "user"),
                         "profileImage": users[email].get("photo", ""),
                         "completedTests": users[email].get("completedTests", []),
-                        "completedNotes": users[email].get("completedNotes", [])
+                        "completedNotes": users[email].get("completedNotes", []),
+                        "completedGestures": users[email].get("completedGestures", [])
                     }
                 }
                 print(f"Login successful for {email} (role: {users[email].get('role', 'user')})")
@@ -136,7 +158,8 @@ def handle_auth_request(request, users):
             "photo": "",
             "role": role,
             "completedTests": [],
-            "completedNotes": request.get("completedNotes", [])
+            "completedNotes": request.get("completedNotes", []),
+            "completedGestures": request.get("completedGestures", [])
         }
         save_json_file(USER_DATA_FILE, users)
         print(f"User registered: {email}")
@@ -180,6 +203,9 @@ def handle_user_request(request, users):
             if 'completedNotes' in data:
                 users[username]['completedNotes'] = data['completedNotes']
 
+            if 'completedGestures' in data:
+                users[username]['completedGestures'] = data['completedGestures']
+
             save_json_file(USER_DATA_FILE, users)
             print(f"Profile updated for {username}")
 
@@ -192,7 +218,9 @@ def handle_user_request(request, users):
                     "name": users[username].get("name", ""),
                     "role": users[username].get("role", "user"),
                     "profileImage": users[username].get("photo", ""),
-                    "completedTests": users[username].get("completedTests", [])
+                    "completedTests": users[username].get("completedTests", []),
+                    "completedNotes": users[username].get("completedNotes", []),
+                    "completedGestures": users[username].get("completedGestures", [])
                 }
             }
         else:
@@ -214,6 +242,7 @@ def handle_user_request(request, users):
 # ============== GESTURE HANDLERS ==============
 def handle_gesture_request(request):
     action = request.get('action')
+    language = request.get('language', 'uk')
 
     if action == 'get_all':
         gestures = load_json_file(GESTURES_DATA_FILE)
@@ -295,7 +324,7 @@ def handle_gesture_request(request):
             frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
             if frame is not None:
-                gesture = process_frame(frame)
+                gesture = process_frame(frame, language)
                 return {"gesture": gesture}
             else:
                 return {"gesture": "Error decoding frame"}
@@ -722,7 +751,8 @@ async def main():
                 "photo": "",
                 "role": "user",
                 "completedTests": [],
-                "completedNotes": []
+                "completedNotes": [],
+                "completedGestures": []
             },
             "admin@example.com": {
                 "password": "admin123",
@@ -730,7 +760,8 @@ async def main():
                 "photo": "",
                 "role": "admin",
                 "completedTests": [],
-                "completedNotes": []
+                "completedNotes": [],
+                "completedGestures": []
             }
         }
         save_json_file(USER_DATA_FILE, default_users)
